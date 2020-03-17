@@ -38,7 +38,7 @@ const App: React.FC = () => {
               setSelectedPage(props.match.params.name);
               return <Page {...props} />;
             }} exact={true} />
-            <Route path="/" render={() => <Redirect to="/page/Inbox" />} exact={true} />
+            <Route path="/" render={() => <Redirect to="/page/Board" />} exact={true} />
           </IonRouterOutlet>
         </IonSplitPane>
       </IonReactRouter>

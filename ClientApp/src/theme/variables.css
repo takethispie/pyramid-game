@@ -226,4 +226,8 @@ http://ionicframework.com/docs/theming/ */
   ion-title.title-large {
     --color: white;
   }
+
+  ion-split-pane {
+    --side-max-width: 18rem;
+  }
 }
