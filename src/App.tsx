@@ -1,5 +1,4 @@
 import Menu from './components/Menu';
-import Page from './pages/Page';
 import React, { useState } from 'react';
 import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
@@ -23,6 +22,7 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import Board from 'pages/Board';
 
 const App: React.FC = () => {
 
@@ -34,11 +34,11 @@ const App: React.FC = () => {
         <IonSplitPane contentId="main">
           <Menu selectedPage={selectedPage} />
           <IonRouterOutlet id="main">
-            <Route path="/page/:name" render={(props) => {
-              setSelectedPage(props.match.params.name);
-              return <Page {...props} />;
+            <Route path="/board" render={(props) => {
+              setSelectedPage("board");
+              return <Board/>;
             }} exact={true} />
-            <Route path="/" render={() => <Redirect to="/page/Board" />} exact={true} />
+            <Route path="/" render={() => <Redirect to="/board" />} exact={true} />
           </IonRouterOutlet>
         </IonSplitPane>
       </IonReactRouter>

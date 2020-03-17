@@ -11,7 +11,7 @@ import {
 } from '@ionic/react';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { personOutline, homeOutline } from 'ionicons/icons';
+import { personOutline, homeOutline, playOutline } from 'ionicons/icons';
 import './Menu.css';
 
 interface MenuProps extends RouteComponentProps {
@@ -22,6 +22,7 @@ interface AppPage {
   url: string;
   icon: string;
   title: string;
+  label: string;
 }
 
 const appPages: AppPage[] = [
@@ -29,7 +30,14 @@ const appPages: AppPage[] = [
     title: 'Accueil',
     url: '/Accueil',
     icon: homeOutline,
+    label: "Accueil"
   },
+  {
+    title: "board",
+    url: "/board",
+    icon: playOutline,
+    label: "Board"
+  }
 ];
 
 const labels = ['Siriane', 'Cindy', 'Martin', 'Seb', 'Marion', 'Félix'];
@@ -47,7 +55,7 @@ const Menu: React.FunctionComponent<MenuProps> = ({ selectedPage }) => {
               <IonMenuToggle key={index} autoHide={false}>
                 <IonItem className={selectedPage === appPage.title ? 'selected' : ''} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
                   <IonIcon slot="start" icon={appPage.icon} />
-                  <IonLabel>{appPage.title}</IonLabel>
+                  <IonLabel>{appPage.label}</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             );
