@@ -19,9 +19,11 @@ import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
-
 /* Theme variables */
-import './theme/variables.css';
+import "./theme/variables.css";
+
+/* Global CSS */
+import "global.css";
 import Board from 'pages/Board';
 import Home from 'pages/Home';
 
@@ -36,11 +38,11 @@ const App: React.FC = () => {
           <Menu selectedPage={selectedPage} />
           <IonRouterOutlet id="main">
             <Route path="/board" render={() => {
-              return <Board/>;
-            }} exact={true}/>
+              return(<Board/>);
+            }}/>
             <Route path="/home" render={() => {
               return <Home/>;
-            }} exact={true}/>
+            }}/>
             <Route path="/" render={() => <Redirect to="/home" />} exact={true} />
           </IonRouterOutlet>
         </IonSplitPane>

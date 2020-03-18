@@ -1,4 +1,4 @@
-import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonGrid, IonRow, IonCol, IonCard, IonList, IonItem, IonButton } from '@ionic/react';
+import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonGrid, IonRow, IonCol, IonCard, IonList, IonItem, IonButton, IonCardContent } from '@ionic/react';
 import React from 'react';
 
 const Board: React.FC = () => {
@@ -19,12 +19,11 @@ const Board: React.FC = () => {
             <IonTitle size="large">Board</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <IonContent>          
         <IonGrid> 
           <IonRow>
             <IonCol offset={"4"} size={"5"}>
               <IonCard>
-                <IonContent>
+                <IonCardContent>
                   <IonList>
                     <IonItem>
                       <IonButton>Rejoindre une partie</IonButton>
@@ -33,12 +32,11 @@ const Board: React.FC = () => {
                       <IonButton>Creer une partie</IonButton>
                     </IonItem>
                   </IonList>
-                </IonContent>
+                </IonCardContent>
               </IonCard>
             </IonCol>
           </IonRow>
         </IonGrid>
-        </IonContent>
       </IonContent>
     </IonPage>
   );
