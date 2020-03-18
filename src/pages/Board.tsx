@@ -1,5 +1,9 @@
-import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonGrid, IonRow, IonCol, IonCard, IonList, IonItem, IonButton, IonCardContent } from '@ionic/react';
+import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonGrid, IonRow, IonCol, IonCard, IonList, IonItem, IonButton, IonCardContent, IonImg } from '@ionic/react';
 import React from 'react';
+import Card from 'components/Card';
+import { CardName } from 'models/CardName';
+import { Stage, Layer, Rect, Text } from 'react-konva';
+import Konva from 'konva';
 
 const Board: React.FC = () => {
   return (
@@ -19,24 +23,12 @@ const Board: React.FC = () => {
             <IonTitle size="large">Board</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <IonGrid> 
-          <IonRow>
-            <IonCol offset={"4"} size={"5"}>
-              <IonCard>
-                <IonCardContent>
-                  <IonList>
-                    <IonItem>
-                      <IonButton>Rejoindre une partie</IonButton>
-                    </IonItem>
-                    <IonItem>
-                      <IonButton>Creer une partie</IonButton>
-                    </IonItem>
-                  </IonList>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-          </IonRow>
-        </IonGrid>
+        <Stage width={window.innerWidth} height={window.innerHeight}>
+          <Layer>
+            
+            <Card x={500} y={500} cardName={CardName.C2}></Card>
+          </Layer>
+        </Stage>
       </IonContent>
     </IonPage>
   );
