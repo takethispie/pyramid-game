@@ -4,6 +4,7 @@ import Card from 'components/Card';
 import { CardName } from 'models/CardName';
 import { Stage, Layer, Rect, Text } from 'react-konva';
 import Konva from 'konva';
+import { CardPositions } from 'models/GameBoard';
 
 const Board: React.FC = () => {
   return (
@@ -25,8 +26,10 @@ const Board: React.FC = () => {
         </IonHeader>
         <Stage width={window.innerWidth} height={window.innerHeight}>
           <Layer>
+            {
+              CardPositions.map(card => <Card x={card.x} y={card.y} cardName={CardName.C2}></Card>)
+            }
             
-            <Card x={500} y={500} cardName={CardName.C2}></Card>
           </Layer>
         </Stage>
       </IonContent>
