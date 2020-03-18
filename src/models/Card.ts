@@ -1,5 +1,9 @@
 import { CardName } from "./CardName";
 
 export class Card {
-    constructor(public Name: CardName, public X: number, public Y: number, public Id: string) {}
+    public Name: string;
+
+    constructor(name: CardName, public X: number, public Y: number, public Id: string) {
+        this.Name = name.substring(1) + name.substring(0,1);
+    }
 }

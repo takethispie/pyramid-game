@@ -6,10 +6,11 @@ import { CardName } from 'models/CardName';
 interface props {
     x: number,
     y: number,
-    cardName: CardName
+    cardName: string,
+    id: string
 }
 
-const Card: React.FC<props> = ({ x, y, cardName }) => {
+const Card: React.FC<props> = ({ x, y, cardName, id }) => {
     const [img] = useImage("/assets/cards/" + cardName.toString() + ".png");
     return <Image width={110} height={180} x={x} y={y} image={img} />;
 };

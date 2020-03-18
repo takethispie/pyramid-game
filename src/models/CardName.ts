@@ -57,5 +57,11 @@ export enum CardName {
     CK =  "KC",
     DK = "KD",
     HK = "KH",
-    SK = "KS"
+    SK = "KS",
+
+    CA = "AC",
+    DA = "AD",
+    HA = "AH",
+    SA = "AS"
+
 }
