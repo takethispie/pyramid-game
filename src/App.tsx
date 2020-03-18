@@ -23,6 +23,7 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import Board from 'pages/Board';
+import Home from 'pages/Home';
 
 const App: React.FC = () => {
 
@@ -34,11 +35,13 @@ const App: React.FC = () => {
         <IonSplitPane contentId="main">
           <Menu selectedPage={selectedPage} />
           <IonRouterOutlet id="main">
-            <Route path="/board" render={(props) => {
-              setSelectedPage("board");
+            <Route path="/board" render={() => {
               return <Board/>;
-            }} exact={true} />
-            <Route path="/" render={() => <Redirect to="/board" />} exact={true} />
+            }} exact={true}/>
+            <Route path="/home" render={() => {
+              return <Home/>;
+            }} exact={true}/>
+            <Route path="/" render={() => <Redirect to="/home" />} exact={true} />
           </IonRouterOutlet>
         </IonSplitPane>
       </IonReactRouter>
