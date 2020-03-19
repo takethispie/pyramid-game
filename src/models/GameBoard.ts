@@ -5,7 +5,7 @@ const cardPadding = 15;
 const cardWidth = 110;
 const cardHeight = 180;
 const startingX = 50;
-const startingY = 700;
+const startingY = 600;
 
 function getRndInteger(min: number, max: number) {
     return Math.floor(Math.random() * (max - min) ) + min;

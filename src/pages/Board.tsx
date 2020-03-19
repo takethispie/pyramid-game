@@ -64,7 +64,7 @@ const Board: React.FC<Props> = ({ revealCard, pyramid }) => {
         </IonHeader>
         <IonGrid>
           <IonRow>
-            <Stage width={window.innerWidth} height={window.innerHeight}>
+            <Stage width={window.innerWidth} height={800}>
               <Provider store={store}>
                 <Layer>
                   {pyramid.map(card => (
