@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image } from 'react-konva';
 import useImage from 'use-image';
 import { Card } from 'models/Card';
 import { ConnectedProps, connect } from 'react-redux';
 import { RootState } from 'stores/root.reducer';
+import { ThunkRevealNextCardSuccess } from 'stores/boardReducer/board.thunk';
+import { RevealCardSuccess } from 'stores/boardReducer/board.action';
 
 interface props {
     card: Card
@@ -15,6 +17,7 @@ const mapState = (state: RootState) => ({
 });
 
 const mapDispatch = {
+    revealCardSuccess: ThunkRevealNextCardSuccess
 };
 
 const connector = connect(mapState, mapDispatch);
@@ -25,11 +28,8 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = PropsFromRedux & props;
 
 
-const CardComponent: React.FC<Props> = ({ card, visibleCards }) => {
-        if(visibleCards.some(id => id === card.Id)) {
-            card.Visible = true;
-        }
-        else card.Visible = false;
+const CardComponent: React.FC<Props> = ({ card, visibleCards, revealCardSuccess }) => {
+    if(visibleCards.some(id => id === card.Id && card.Visible == false)) revealCardSuccess(card);
 
     const [img] = useImage("/assets/cards/" + card.Name.toString() + ".png");
     const [hiddenCardImg] = useImage("/assets/cards/gray_back.png");
