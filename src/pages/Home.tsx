@@ -19,8 +19,31 @@ import {
   IonInput,
 } from "@ionic/react";
 import React from "react";
+import { RootState } from "stores/root.reducer";
+import { ThunkRevealNextCard, ThunkGeneratePyramid } from "stores/boardReducer/board.thunk";
+import { connect } from "react-redux";
+import { ConnectedProps } from "react-redux";
+import { RouteComponentProps, withRouter } from "react-router";
 
-const Home: React.FC = () => {
+const mapState = (state: RootState) => ({});
+
+const mapDispatch = {
+  generatePyramid: ThunkGeneratePyramid
+};
+
+const connector = connect(mapState, mapDispatch);
+// The inferred type will look like:
+// {isOn: boolean, toggleOn: () => void}
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+type Props = PropsFromRedux & RouteComponentProps & {};
+
+const Home: React.FC<Props> = ({ generatePyramid, history }) => {
+  const newGame = () => {
+    generatePyramid();
+    history.push("/board");
+  }
+
   return (
     <IonPage>
       <IonHeader>
@@ -52,7 +75,7 @@ const Home: React.FC = () => {
                       <IonButton>Rejoindre une partie</IonButton>
                     </IonItem>
                     <IonItem>
-                      <IonButton>Creer une partie</IonButton>
+                      <IonButton onClick={() => newGame()}>Creer une partie</IonButton>
                     </IonItem>
                   </IonList>
                 </IonCardContent>
@@ -65,4 +88,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default withRouter(connector(Home));

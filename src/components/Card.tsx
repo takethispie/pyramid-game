@@ -1,18 +1,44 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Stage, Layer, Image } from 'react-konva';
 import useImage from 'use-image';
 import { CardName } from 'models/CardName';
+import { Card } from 'models/Card';
+import { ConnectedProps, connect } from 'react-redux';
+import { RootState } from 'stores/root.reducer';
 
 interface props {
-    x: number,
-    y: number,
-    cardName: string,
-    id: string
+    card: Card
 }
 
-const Card: React.FC<props> = ({ x, y, cardName, id }) => {
-    const [img] = useImage("/assets/cards/" + cardName.toString() + ".png");
-    return <Image width={110} height={180} x={x} y={y} image={img} />;
+
+const mapState = (state: RootState) => ({
+    visibleCards: state.boardReducer.VisibleCardIds
+});
+
+const mapDispatch = {
 };
 
-export default Card;
+const connector = connect(mapState, mapDispatch);
+// The inferred type will look like:
+// {isOn: boolean, toggleOn: () => void}
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+type Props = PropsFromRedux & props;
+
+
+const CardComponent: React.FC<Props> = ({ card, visibleCards }) => {
+    useEffect(() => {
+        if(visibleCards.some(id => id === card.Id)) {
+            console.log("show card " + card.Name);
+            card.Visible = true;
+        }
+        else card.Visible = false;
+    }, [visibleCards])
+
+    const [img] = useImage("/assets/cards/" + card.Name.toString() + ".png");
+    const [hiddenCardImg] = useImage("/assets/cards/gray_back.png");
+    return card.Visible ? <Image width={110} height={180} x={card.X} y={card.Y} image={img} /> 
+        : <Image width={110} height={180} x={card.X} y={card.Y} image={hiddenCardImg}></Image>
+};
+
+export default connector(CardComponent);

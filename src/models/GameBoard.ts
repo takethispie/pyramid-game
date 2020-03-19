@@ -11,20 +11,20 @@ function getRndInteger(min: number, max: number) {
     return Math.floor(Math.random() * (max - min) ) + min;
   }
 
-export const CardPositions: {x: number, y: number, id: string}[] = [
-    {x: startingX, y: startingY, id: "0:0"},
-    { x: startingX + cardWidth + cardPadding, y: startingY, id: "0:1"},
-    { x: startingX + (cardWidth + cardPadding) * 2, y: startingY, id: "0:2"},
-    { x: startingX + (cardWidth + cardPadding) * 3, y: startingY, id: "0:3"},
+export const CardPositions: {x: number, y: number, id: number}[] = [
+    {x: startingX, y: startingY, id: 0},
+    { x: startingX + cardWidth + cardPadding, y: startingY, id: 1},
+    { x: startingX + (cardWidth + cardPadding) * 2, y: startingY, id: 2},
+    { x: startingX + (cardWidth + cardPadding) * 3, y: startingY, id: 3},
     //second row
-    { x: cardWidth + cardPadding, y: startingY - cardHeight - cardPadding, id: "1:0"},
-    { x: (cardWidth + cardPadding) * 2, y: startingY - cardHeight - cardPadding, id: "1:1"},
-    { x: (cardWidth + cardPadding) * 3, y: startingY - cardHeight - cardPadding, id: "1:2"},
+    { x: cardWidth + cardPadding, y: startingY - cardHeight - cardPadding, id: 4},
+    { x: (cardWidth + cardPadding) * 2, y: startingY - cardHeight - cardPadding, id: 5},
+    { x: (cardWidth + cardPadding) * 3, y: startingY - cardHeight - cardPadding, id: 6},
     //third row
-    { x: cardWidth * 2 - cardPadding * 2, y: startingY - (cardHeight + cardPadding)*2, id: "2:0"},
-    { x: cardWidth * 3 - cardPadding, y: startingY - (cardHeight + cardPadding)*2, id: "2:1"},
+    { x: cardWidth * 2 - cardPadding * 2, y: startingY - (cardHeight + cardPadding)*2, id: 7},
+    { x: cardWidth * 3 - cardPadding, y: startingY - (cardHeight + cardPadding)*2, id: 8},
     //last row
-    { x: cardWidth * 2 + cardPadding * 2, y: startingY - (cardHeight + cardPadding)*3, id: "2:2"},
+    { x: cardWidth * 2 + cardPadding * 2, y: startingY - (cardHeight + cardPadding)*3, id: 9},
 ];
 
 export const RandomizeCards = () => {

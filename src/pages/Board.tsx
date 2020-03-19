@@ -1,14 +1,53 @@
-import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonGrid, IonRow, IonCol, IonCard, IonList, IonItem, IonButton, IonCardContent, IonImg } from '@ionic/react';
-import React from 'react';
-import Card from 'components/Card';
-import { Stage, Layer } from 'react-konva';
-import Konva from 'konva';
-import { RandomizeCards, CreatePyramid } from 'models/GameBoard';
+import {
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonMenuButton,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonCard,
+  IonList,
+  IonItem,
+  IonButton,
+  IonCardContent,
+  IonImg
+} from "@ionic/react";
+import React, { useEffect } from "react";
+import { Stage, Layer } from "react-konva";
+import Konva from "konva";
+import { RandomizeCards, CreatePyramid } from "models/GameBoard";
+import CardComponent from "components/Card";
+import { RootState } from "stores/root.reducer";
+import { connect, ConnectedProps, Provider } from "react-redux";
+import { ThunkRevealNextCard, ThunkGeneratePyramid } from "stores/boardReducer/board.thunk";
+import store from "stores";
 
-const Board: React.FC = () => {
+const mapState = (state: RootState) => ({});
+
+const mapDispatch = {
+  revealCard: ThunkRevealNextCard,
+  generatePyramid: ThunkGeneratePyramid
+};
+
+const connector = connect(mapState, mapDispatch);
+// The inferred type will look like:
+// {isOn: boolean, toggleOn: () => void}
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+type Props = PropsFromRedux & {};
+
+const Board: React.FC<Props> = ({ revealCard, generatePyramid }) => {
   //temporary code
   let cards = RandomizeCards();
   let pyramidBoard = CreatePyramid(cards);
+
+  useEffect(() => {
+    generatePyramid();
+  });
 
   return (
     <IonPage>
@@ -27,16 +66,29 @@ const Board: React.FC = () => {
             <IonTitle size="large">Board</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <Stage width={window.innerWidth} height={window.innerHeight}>
-          <Layer>
-            {
-              pyramidBoard.pyramid.map(card => <Card key={card.Id} x={card.X} y={card.Y} cardName={card.Name} id={card.Id}></Card>)
-            }
-          </Layer>
-        </Stage>
+        <IonGrid>
+          <IonRow>
+            <Stage width={window.innerWidth} height={window.innerHeight}>
+              <Provider store={store}>
+                <Layer>
+                  {pyramidBoard.pyramid.map(card => (
+                    <CardComponent key={card.Id} card={card}></CardComponent>
+                  ))}
+                </Layer>
+              </Provider>
+            </Stage>
+          </IonRow>
+          <IonRow>
+            <IonCol>
+              <IonItem>
+                <IonButton onClick={() => revealCard()}>test</IonButton>
+              </IonItem>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
       </IonContent>
     </IonPage>
   );
 };
 
-export default Board;
+export default connector(Board);
