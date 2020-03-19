@@ -26,7 +26,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = PropsFromRedux & props;
 
 
-const CardComponent: React.FC<Props> = ({ card, visibleCards, updateCard }) => {
+const CardComponent: React.FC<Props> = ({ card, visibleCards }) => {
         if(visibleCards.some(id => id === card.Id)) {
             card.Visible = true;
         }
