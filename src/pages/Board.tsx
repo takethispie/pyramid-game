@@ -14,7 +14,8 @@ import {
   IonItem,
   IonButton,
   IonCardContent,
-  IonImg
+  IonImg,
+  IonToast
 } from "@ionic/react";
 import React, { useEffect } from "react";
 import { Stage, Layer } from "react-konva";
@@ -27,7 +28,8 @@ import { ThunkRevealNextCard, ThunkGeneratePyramid } from "stores/boardReducer/b
 import store from "stores";
 
 const mapState = (state: RootState) => ({
-  pyramid: state.boardReducer.Pyramid
+  pyramid: state.boardReducer.Pyramid,
+  boardError: state.boardReducer.ErrorMessage
 });
 
 const mapDispatch = {
@@ -42,7 +44,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 type Props = PropsFromRedux & {};
 
-const Board: React.FC<Props> = ({ revealCard, pyramid }) => {
+const Board: React.FC<Props> = ({ revealCard, pyramid, boardError }) => {
 
 
   return (
@@ -57,6 +59,7 @@ const Board: React.FC<Props> = ({ revealCard, pyramid }) => {
       </IonHeader>
 
       <IonContent>
+        <IonToast isOpen={boardError !== ""} message={boardError} duration={3000}></IonToast>
         <IonHeader collapse="condense">
           <IonToolbar>
             <IonTitle size="large">Board</IonTitle>
