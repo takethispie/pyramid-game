@@ -26,7 +26,9 @@ import { connect, ConnectedProps, Provider } from "react-redux";
 import { ThunkRevealNextCard, ThunkGeneratePyramid } from "stores/boardReducer/board.thunk";
 import store from "stores";
 
-const mapState = (state: RootState) => ({});
+const mapState = (state: RootState) => ({
+  pyramid: state.boardReducer.Pyramid
+});
 
 const mapDispatch = {
   revealCard: ThunkRevealNextCard,
@@ -40,14 +42,8 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 type Props = PropsFromRedux & {};
 
-const Board: React.FC<Props> = ({ revealCard, generatePyramid }) => {
-  //temporary code
-  let cards = RandomizeCards();
-  let pyramidBoard = CreatePyramid(cards);
+const Board: React.FC<Props> = ({ revealCard, pyramid }) => {
 
-  useEffect(() => {
-    generatePyramid();
-  });
 
   return (
     <IonPage>
@@ -71,7 +67,7 @@ const Board: React.FC<Props> = ({ revealCard, generatePyramid }) => {
             <Stage width={window.innerWidth} height={window.innerHeight}>
               <Provider store={store}>
                 <Layer>
-                  {pyramidBoard.pyramid.map(card => (
+                  {pyramid.map(card => (
                     <CardComponent key={card.Id} card={card}></CardComponent>
                   ))}
                 </Layer>

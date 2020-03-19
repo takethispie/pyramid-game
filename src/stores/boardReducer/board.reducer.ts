@@ -1,11 +1,13 @@
 import { BoardState } from "./board.state";
-import { BoardActionsTypes, REVEAL_CARD, REVEAL_CARD_SUCCESS, GENERATE_PYRAMID, GENERATE_PYRAMID_SUCCESS } from "./board.action";
+import { BoardActionsTypes, REVEAL_CARD, REVEAL_CARD_SUCCESS, GENERATE_PYRAMID, GENERATE_PYRAMID_SUCCESS, GENERATE_PYRAMID_ERROR } from "./board.action";
 
 export const defaultBoardState: BoardState = {
     VisibleCardIds: [],
     RemainingCards: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     Pyramid: [],
-    LastId: -1
+    LastId: -1,
+    IsPyramidLoaded: false,
+    ErrorMessage: "",
 };
 
 const BoardReducer = (state: BoardState = defaultBoardState, action: BoardActionsTypes): BoardState => {
@@ -17,10 +19,13 @@ const BoardReducer = (state: BoardState = defaultBoardState, action: BoardAction
             return {...state, Pyramid: state.Pyramid.map(card => {if(card.Id == state.LastId) card.Visible = true; return card })}
 
         case GENERATE_PYRAMID:
-            return {...state};
+            return {...state, ErrorMessage: ""};
 
         case GENERATE_PYRAMID_SUCCESS:
-            return {...state, Pyramid: action.payload.pyramid}
+            return {...state, Pyramid: action.payload.pyramid, IsPyramidLoaded: true}
+
+        case GENERATE_PYRAMID_ERROR:
+            return {...state, ErrorMessage: action.payload.errorMessage};
 
         default:
             return state;

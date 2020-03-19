@@ -28,10 +28,7 @@ type Props = PropsFromRedux & props;
 
 const CardComponent: React.FC<Props> = ({ card, visibleCards }) => {
     useEffect(() => {
-        if(visibleCards.some(id => id === card.Id)) {
-            console.log("show card " + card.Name);
-            card.Visible = true;
-        }
+        if(visibleCards.some(id => id === card.Id)) card.Visible = true;
         else card.Visible = false;
     }, [visibleCards])
 
