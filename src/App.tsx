@@ -24,28 +24,32 @@ import "./theme/variables.css";
 
 import Board from 'pages/Board';
 import Home from 'pages/Home';
+import { Provider } from 'react-redux';
+import store from 'stores';
 
 const App: React.FC = () => {
 
   const [selectedPage, setSelectedPage] = useState('');
 
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonSplitPane contentId="main">
-          <Menu selectedPage={selectedPage} />
-          <IonRouterOutlet id="main">
-            <Route path="/board" render={() => {
-              return(<Board/>);
-            }}/>
-            <Route path="/home" render={() => {
-              return <Home/>;
-            }}/>
-            <Route path="/" render={() => <Redirect to="/home" />} exact={true} />
-          </IonRouterOutlet>
-        </IonSplitPane>
-      </IonReactRouter>
-    </IonApp>
+    <Provider store={store}>
+      <IonApp>
+        <IonReactRouter>
+          <IonSplitPane contentId="main">
+            <Menu selectedPage={selectedPage} />
+            <IonRouterOutlet id="main">
+              <Route path="/board" render={() => {
+                return <Board />;
+              }} />
+              <Route path="/home" render={() => {
+                return <Home />;
+              }} />
+              <Route path="/" render={() => <Redirect to="/home" />} exact={true} />
+            </IonRouterOutlet>
+          </IonSplitPane>
+        </IonReactRouter>
+      </IonApp>
+    </Provider>
   );
 };
 
