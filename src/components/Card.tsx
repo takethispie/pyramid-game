@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
-import { Stage, Layer, Image } from 'react-konva';
+import React from 'react';
+import { Image } from 'react-konva';
 import useImage from 'use-image';
-import { CardName } from 'models/CardName';
 import { Card } from 'models/Card';
 import { ConnectedProps, connect } from 'react-redux';
 import { RootState } from 'stores/root.reducer';

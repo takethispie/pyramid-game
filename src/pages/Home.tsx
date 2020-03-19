@@ -7,7 +7,6 @@ import {
   IonTitle,
   IonToolbar,
   IonCard,
-  IonCardTitle,
   IonGrid,
   IonRow,
   IonCol,
@@ -20,7 +19,7 @@ import {
 } from "@ionic/react";
 import React from "react";
 import { RootState } from "stores/root.reducer";
-import { ThunkRevealNextCard, ThunkGeneratePyramid } from "stores/boardReducer/board.thunk";
+import { ThunkGeneratePyramid } from "stores/boardReducer/board.thunk";
 import { connect } from "react-redux";
 import { ConnectedProps } from "react-redux";
 import { RouteComponentProps, withRouter } from "react-router";

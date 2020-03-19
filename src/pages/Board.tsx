@@ -9,18 +9,12 @@ import {
   IonGrid,
   IonRow,
   IonCol,
-  IonCard,
-  IonList,
   IonItem,
   IonButton,
-  IonCardContent,
-  IonImg,
   IonToast
 } from "@ionic/react";
-import React, { useEffect } from "react";
+import React from "react";
 import { Stage, Layer } from "react-konva";
-import Konva from "konva";
-import { RandomizeCards, CreatePyramid } from "models/GameBoard";
 import CardComponent from "components/Card";
 import { RootState } from "stores/root.reducer";
 import { connect, ConnectedProps, Provider } from "react-redux";
