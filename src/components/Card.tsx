@@ -26,11 +26,11 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = PropsFromRedux & props;
 
 
-const CardComponent: React.FC<Props> = ({ card, visibleCards }) => {
-    useEffect(() => {
-        if(visibleCards.some(id => id === card.Id)) card.Visible = true;
+const CardComponent: React.FC<Props> = ({ card, visibleCards, updateCard }) => {
+        if(visibleCards.some(id => id === card.Id)) {
+            card.Visible = true;
+        }
         else card.Visible = false;
-    }, [visibleCards])
 
     const [img] = useImage("/assets/cards/" + card.Name.toString() + ".png");
     const [hiddenCardImg] = useImage("/assets/cards/gray_back.png");
