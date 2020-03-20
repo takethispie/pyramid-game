@@ -1,7 +1,7 @@
 import { HandState } from "./hand.state";
 import { HandActionsTypes } from "./hand.actions";
 
-const defaultHandState: HandState = {
+export const defaultHandState: HandState = {
     IsLoading: false,
     showCardsHidden: false,
     showCardsVisible: false,

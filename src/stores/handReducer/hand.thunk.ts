@@ -15,7 +15,7 @@ export const ThunkLoadHand = (nickname: string, gameId: string): ThunkAction<voi
             new Card(CardName.HA, 0, 0, 0),
             new Card(CardName.HK, 0, 0, 0)
         ];
-        dispatch(LoadHandSuccess(result))
+        dispatch(LoadHandSuccess(result));
     } catch (error) {
         dispatch(LoadHandError(error));
     }
