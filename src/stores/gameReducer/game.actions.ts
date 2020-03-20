@@ -1,58 +1,85 @@
-export const GAME_CHOOSE_TARGET = "GAME_CHOOSE_TARGET"
-export const GAME_ACCUSE = "GAME_ACCUSE"
-export const GAME_ACCEPT_TO_DRINK = "GAME_ACCEPT_TO_DRINK"
-export const GAME_DRINK = "GAME_DRINK"
+import { GameStep } from "./game.state"
 
-interface GameChooseTargetAction {
-    type: typeof GAME_CHOOSE_TARGET,
+// ----- GAME_ADD_TARGET -----
+
+export const GAME_ADD_TARGET = "GAME_ADD_TARGET"
+interface GameAddTargetAction {
+    type: typeof GAME_ADD_TARGET,
     payload: {
-        playerWhoChooses: string,
+        playerWhoTargets: string,
         targetedPlayer: string
     }
 }
 
-interface GameAccuseAction {
-    type: typeof GAME_ACCUSE,
+export function GameAddTarget(
+    playerWhoTargets: string,
+    targetedPlayer: string
+): GameAddTargetAction {
+    return {
+        type: GAME_ADD_TARGET,
+        payload: {
+            playerWhoTargets,
+            targetedPlayer
+        }
+    }
+}
+
+// ----- GAME_REMOVE_TARGET -----
+
+export const GAME_REMOVE_TARGET = "GAME_REMOVE_TARGET"
+interface GameRemoveTargetAction {
+    type: typeof GAME_REMOVE_TARGET,
+    payload: {
+        playerWhoTargets: string
+    }
+}
+
+export function GameRemoveTarget(
+    playerWhoTargets: string
+): GameRemoveTargetAction {
+    return {
+        type: GAME_REMOVE_TARGET,
+        payload: {
+            playerWhoTargets
+        }
+    }
+}
+
+// ----- GAME_SET_STEP -----
+
+export const GAME_SET_STEP = "GAME_SET_STEP"
+interface GameSetStepAction {
+    type: typeof GAME_SET_STEP,
+    payload: {
+        step: GameStep
+    }
+}
+
+export function GameSetStep(
+    step: GameStep
+): GameSetStepAction {
+    return {
+        type: GAME_SET_STEP,
+        payload: {
+            step
+        }
+    }
+}
+
+// ----- GAME_ADD_ACCUSATION -----
+
+export const GAME_ADD_ACCUSATION = "GAME_ADD_ACCUSATION"
+interface GameAddAccusationAction {
+    type: typeof GAME_ADD_ACCUSATION,
     payload: {
         playerWhoAccuses: string,
         accusedPlayer: string
     }
 }
 
-interface GameAcceptToDrinkAction {
-    type: typeof GAME_ACCEPT_TO_DRINK,
-    payload: {
-        playerWhoAccepts: string,
-        playerWhoTargets: string
-    }
-}
-
-interface GameDrinkAction {
-    type: typeof GAME_DRINK,
-    payload: {
-        player: string
-    }
-}
-
-export type GameActionsTypes
-    = GameChooseTargetAction
-    | GameAccuseAction
-    | GameAcceptToDrinkAction
-    | GameDrinkAction
-
-export function GameChooseTarget(playerWhoChooses: string, targetedPlayer: string): GameChooseTargetAction {
+export function GameAddAccusation(playerWhoAccuses: string, accusedPlayer: string): GameAddAccusationAction {
     return {
-        type: GAME_CHOOSE_TARGET,
-        payload: {
-            playerWhoChooses,
-            targetedPlayer
-        }
-    }
-}
-
-export function GameAccuse(playerWhoAccuses: string, accusedPlayer: string): GameAccuseAction {
-    return {
-        type: GAME_ACCUSE,
+        type: GAME_ADD_ACCUSATION,
         payload: {
             playerWhoAccuses,
             accusedPlayer
@@ -60,21 +87,88 @@ export function GameAccuse(playerWhoAccuses: string, accusedPlayer: string): Gam
     }
 }
 
-export function GameAcceptToDrink(playerWhoAccepts: string, playerWhoTargets: string): GameAcceptToDrinkAction {
+// ----- GAME_REMOVE_ACCUSATION -----
+
+export const GAME_REMOVE_ACCUSATION = "GAME_REMOVE_ACCUSATION"
+interface GameRemoveAccusationAction {
+    type: typeof GAME_REMOVE_ACCUSATION,
+    payload: {
+        playerWhoAccuses: string
+    }
+}
+
+export function GameRemoveAccusation(playerWhoAccuses: string): GameRemoveAccusationAction {
     return {
-        type: GAME_ACCEPT_TO_DRINK,
+        type: GAME_REMOVE_ACCUSATION,
         payload: {
-            playerWhoAccepts,
-            playerWhoTargets
+            playerWhoAccuses
         }
     }
 }
 
-export function GameDrink(player: string): GameDrinkAction {
+// ----- GAME_ADD_SIPS -----
+
+export const GAME_ADD_SIPS = "GAME_ADD_SIPS"
+interface GameAddSipsAction {
+    type: typeof GAME_ADD_SIPS,
+    payload: {
+        player: string,
+        numberOfSips: number
+    }
+}
+
+export function GameAddSips(player: string, numberOfSips: number): GameAddSipsAction {
     return {
-        type: GAME_DRINK,
+        type: GAME_ADD_SIPS,
         payload: {
-            player: player
+            player,
+            numberOfSips
         }
     }
 }
+
+// ----- GAME_ADD_DONE_DRINKING -----
+
+export const GAME_ADD_DONE_DRINKING = "GAME_ADD_DONE_DRINKING"
+interface GameAddDoneDrinkingAction {
+    type: typeof GAME_ADD_DONE_DRINKING,
+    payload: {
+        player: string
+    }
+}
+
+export function GameAddDoneDrinking(player: string): GameAddDoneDrinkingAction {
+    return {
+        type: GAME_ADD_DONE_DRINKING,
+        payload: {
+            player
+        }
+    }
+}
+
+// ----- GAME_RESET_DONE_DRINKING -----
+
+export const GAME_RESET_DONE_DRINKING = "GAME_RESET_DONE_DRINKING"
+interface GameResetDoneDrinkingAction {
+    type: typeof GAME_RESET_DONE_DRINKING,
+    payload: {}
+}
+
+export function GameResetDoneDrinking(): GameResetDoneDrinkingAction {
+    return {
+        type: GAME_RESET_DONE_DRINKING,
+        payload: {}
+    }
+}
+
+// -----
+
+export type GameActionsTypes
+    = GameAddTargetAction
+    | GameRemoveTargetAction
+    | GameSetStepAction
+    | GameAddAccusationAction
+    | GameRemoveAccusationAction
+    | GameAddSipsAction
+    | GameAddDoneDrinkingAction
+    | GameResetDoneDrinkingAction

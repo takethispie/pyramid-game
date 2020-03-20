@@ -1,10 +1,14 @@
 import { GameState, GameStep } from './game.state';
 import {
     GameActionsTypes,
-    GAME_CHOOSE_TARGET,
-    GAME_ACCUSE,
-    GAME_ACCEPT_TO_DRINK,
-    GAME_DRINK
+    GAME_ADD_TARGET,
+    GAME_REMOVE_TARGET,
+    GAME_SET_STEP,
+    GAME_ADD_ACCUSATION,
+    GAME_REMOVE_ACCUSATION,
+    GAME_ADD_SIPS,
+    GAME_ADD_DONE_DRINKING,
+    GAME_RESET_DONE_DRINKING
 } from './game.actions';
 
 export const defaultGameState: GameState = {
@@ -19,92 +23,70 @@ export const defaultGameState: GameState = {
 const GameReducer = (state: GameState = defaultGameState, action: GameActionsTypes): GameState => {
     switch (action.type) {
 
-        case GAME_CHOOSE_TARGET:
-            {
-                let newState = { ...state }
-
-                newState.Targets[action.payload.playerWhoChooses] = action.payload.targetedPlayer
-
-                // Each player targeted someone
-                if ([...newState.Players].every(x => x in newState.Targets)) {
-                    newState.CurrentStep = GameStep.Accuse
-                }
-
-                return newState
-            }
-
-        case GAME_ACCUSE:
-            {
-                // A player A can accuse another player B of lying only if B targeted A
-                if (state.Targets[action.payload.accusedPlayer] !== action.payload.playerWhoAccuses) {
-                    return state
-                }
-                let newTargets = { ...state.Targets }
-                delete newTargets[action.payload.accusedPlayer]
-                let newAccusations = { ...state.Accusations }
-                newAccusations[action.payload.playerWhoAccuses] = action.payload.accusedPlayer
-                let newStep = state.CurrentStep
-                if (Object.keys(newTargets).length == 0) {
-                    newStep = GameStep.Deny
-                }
-                return {
-                    ...state
-                    , CurrentStep: newStep
-                    , Targets: newTargets
-                    , Accusations: newAccusations
+        case GAME_ADD_TARGET:
+            return {
+                ...state
+                , Targets: {
+                    ...state.Targets
+                    , [action.payload.playerWhoTargets]: action.payload.targetedPlayer
                 }
             }
 
-        case GAME_ACCEPT_TO_DRINK:
-            {
-                let newTargets = { ...state.Targets }
-                delete newTargets[action.payload.playerWhoTargets]
+        case GAME_REMOVE_TARGET:
+            let newTargets = { ...state.Targets }
+            delete newTargets[action.payload.playerWhoTargets]
+            return {
+                ...state
+                , Targets: newTargets
+            }
 
-                let newSips = { ...state.Sips }
-                if (!(action.payload.playerWhoAccepts in newSips)) {
-                    newSips[action.payload.playerWhoAccepts] = 0
-                }
-                newSips[action.payload.playerWhoAccepts]++
+        case GAME_SET_STEP:
+            return {
+                ...state
+                , CurrentStep: action.payload.step
+            }
 
-                let newStep = state.CurrentStep
-                if (Object.keys(newTargets).length == 0) {
-                    if (Object.keys(state.Accusations).length == 0) {
-                        newStep = GameStep.Drink
-                        state.Players.forEach(player => {
-                            if (!(player in newSips)) {
-                                newSips[player] = 0
-                            }
-                        });
-                    } else {
-                        newStep = GameStep.Deny
-                    }
-                }
-
-                return {
-                    ...state
-                    , CurrentStep: newStep
-                    , Targets: newTargets
-                    , Sips: newSips
+        case GAME_ADD_ACCUSATION:
+            return {
+                ...state
+                , Accusations: {
+                    ...state.Accusations
+                    , [action.payload.playerWhoAccuses]: action.payload.accusedPlayer
                 }
             }
 
-        case GAME_DRINK:
-            {
-                let newDoneDrinking = new Set([...state.DoneDrinking, action.payload.player])
-                let remainingToDrink = new Set([...state.Players].filter(x => !newDoneDrinking.has(x)))
-                if (remainingToDrink.size == 0) {
-                    return {
-                        ...state
-                        , CurrentStep: GameStep.ChooseTarget
-                        , DoneDrinking: new Set
-                    };
-                }
-                else {
-                    return {
-                        ...state
-                        , DoneDrinking: newDoneDrinking
-                    };
-                }
+        case GAME_REMOVE_ACCUSATION:
+            let newAccusations = { ...state.Accusations }
+            delete newAccusations[action.payload.playerWhoAccuses]
+            return {
+                ...state
+                , Accusations: newAccusations
+            }
+
+        case GAME_ADD_SIPS:
+            let newSips = { ...state.Sips }
+            if (!(action.payload.player in newSips)) {
+                newSips[action.payload.player] = 0
+            }
+            newSips[action.payload.player] += action.payload.numberOfSips
+            return {
+                ...state
+                , Sips: newSips
+            }
+
+        case GAME_ADD_DONE_DRINKING:
+            return {
+                ...state
+                , DoneDrinking: new Set([
+                    ...state.DoneDrinking
+                    , action.payload.player
+                ])
+            }
+
+        case GAME_RESET_DONE_DRINKING:
+            return {
+                ...state
+                , DoneDrinking: new Set
             }
 
         default:

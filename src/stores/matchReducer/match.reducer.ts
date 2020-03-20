@@ -12,20 +12,9 @@ export const defaultMatchState: MatchState = {
 };
 
 const MatchReducer = (state: MatchState = defaultMatchState, action: MatchActionsTypes): MatchState => {
-
-    // TODO: is there a better way to do this?
-    let gameState = { ...state.Game }
-    let gameAction = action as GameActionsTypes
-    if (gameAction.type) {
-        gameState = GameReducer(gameState, gameAction)
-    }
-
     switch (action.type) {
         default:
-            return {
-                ...state,
-                Game: gameState
-            }
+            return state
     }
 };
 

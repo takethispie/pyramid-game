@@ -26,7 +26,7 @@ interface MatchConnectError {
     }
 }
 
-export type MatchActionsTypes = MatchConnect | MatchConnectSuccess | MatchConnectError | GameActionsTypes;
+export type MatchActionsTypes = MatchConnect | MatchConnectSuccess | MatchConnectError;
 
 export function ConnectMatch(id: string, nickname: string): MatchActionsTypes {
     return {
