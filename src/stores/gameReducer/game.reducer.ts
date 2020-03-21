@@ -13,7 +13,7 @@ import {
 
 export const defaultGameState: GameState = {
     CurrentStep: GameStep.ChooseTarget,
-    Players: new Set,
+    Players: new Set(['player1', 'player2', 'player3']),
     Targets: {},
     Accusations: {},
     Sips: {},
