@@ -4,5 +4,6 @@ export interface MatchState {
     IsInMatch: boolean,
     MatchId: string,
     ErrorMessage: string,
-    NickName: string
+    NickName: string,
+    Game: GameState
 }
