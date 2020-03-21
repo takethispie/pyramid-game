@@ -77,7 +77,7 @@ interface GameAddAccusationAction {
     }
 }
 
-export function GameAddAccusation(playerWhoAccuses: string, accusedPlayer: string): GameAddAccusationAction {
+export function GameAddAccusation(accusedPlayer: string, playerWhoAccuses: string): GameAddAccusationAction {
     return {
         type: GAME_ADD_ACCUSATION,
         payload: {
@@ -93,15 +93,15 @@ export const GAME_REMOVE_ACCUSATION = "GAME_REMOVE_ACCUSATION"
 interface GameRemoveAccusationAction {
     type: typeof GAME_REMOVE_ACCUSATION,
     payload: {
-        playerWhoAccuses: string
+        accusedPlayer: string
     }
 }
 
-export function GameRemoveAccusation(playerWhoAccuses: string): GameRemoveAccusationAction {
+export function GameRemoveAccusation(accusedPlayer: string): GameRemoveAccusationAction {
     return {
         type: GAME_REMOVE_ACCUSATION,
         payload: {
-            playerWhoAccuses
+            accusedPlayer
         }
     }
 }

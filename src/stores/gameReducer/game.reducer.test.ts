@@ -1,4 +1,4 @@
-import { GameStep } from './game.state'
+import { GameStep, GameState } from './game.state'
 import {
     GameAddTarget,
     GameRemoveTarget,
@@ -63,11 +63,37 @@ describe('when the game reducer receives a GAME_ADD_ACCUSATION', () => {
             GameReducer({
                 ...defaultGameState
                 , Accusations: {}
-            }, GameAddAccusation('playerWhoAccuses', 'accusedPlayer'))
+            }, GameAddAccusation('accusedPlayer', 'playerWhoAccuses'))
         ).toEqual({
             ...defaultGameState
             , Accusations: {
-                'playerWhoAccuses': 'accusedPlayer'
+                'accusedPlayer': 'playerWhoAccuses'
+            }
+        })
+    })
+})
+
+describe('when the game reducer receives two GAME_ADD_ACCUSATION with the same accuser', () => {
+
+    let state: GameState
+
+    beforeEach(() => {
+        state = {
+            ...defaultGameState
+            , Accusations: {}
+        }
+        state = GameReducer(state, GameAddAccusation('accusedPlayer1', 'playerWhoAccuses'))
+        state = GameReducer(state, GameAddAccusation('accusedPlayer2', 'playerWhoAccuses'))
+    })
+
+    it('then it adds both accusations to the accusation list', () => {
+        expect(
+            state
+        ).toEqual({
+            ...defaultGameState
+            , Accusations: {
+                'accusedPlayer1': 'playerWhoAccuses'
+                , 'accusedPlayer2': 'playerWhoAccuses'
             }
         })
     })
@@ -79,9 +105,9 @@ describe('when the game reducer receives a GAME_REMOVE_ACCUSATION', () => {
             GameReducer({
                 ...defaultGameState
                 , Accusations: {
-                    'playerWhoAccuses': 'accusedPlayer'
+                    'accusedPlayer': 'playerWhoAccuses'
                 }
-            }, GameRemoveAccusation('playerWhoAccuses'))
+            }, GameRemoveAccusation('accusedPlayer'))
         ).toEqual({
             ...defaultGameState
             , Accusations: {}

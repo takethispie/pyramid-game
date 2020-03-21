@@ -51,13 +51,13 @@ const GameReducer = (state: GameState = defaultGameState, action: GameActionsTyp
                 ...state
                 , Accusations: {
                     ...state.Accusations
-                    , [action.payload.playerWhoAccuses]: action.payload.accusedPlayer
+                    , [action.payload.accusedPlayer]: action.payload.playerWhoAccuses
                 }
             }
 
         case GAME_REMOVE_ACCUSATION:
             let newAccusations = { ...state.Accusations }
-            delete newAccusations[action.payload.playerWhoAccuses]
+            delete newAccusations[action.payload.accusedPlayer]
             return {
                 ...state
                 , Accusations: newAccusations

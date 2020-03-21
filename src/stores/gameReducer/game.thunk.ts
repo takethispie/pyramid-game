@@ -11,11 +11,12 @@ import {
     GameResetDoneDrinking,
     GameRemoveAccusation
 } from "./game.actions";
+import { RootState } from "stores/root.reducer";
 
 export const ThunkChooseTarget =
-    (playerWhoTargets: string, targetedPlayer: string): ThunkAction<void, GameState, unknown, Action<string>> =>
-        (dispatch: Dispatch<Action>, getState: () => GameState) => {
-            const state = getState()
+    (playerWhoTargets: string, targetedPlayer: string): ThunkAction<void, RootState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => RootState) => {
+            const state = getState().gameReducer
             const players = [...state.Players]
             const playersDoneTargeting = [...Object.keys(state.Targets), playerWhoTargets]
 
@@ -26,30 +27,30 @@ export const ThunkChooseTarget =
         }
 
 export const ThunkAccuse =
-    (playerWhoAccuses: string, accusedPlayer: string): ThunkAction<void, GameState, unknown, Action<string>> =>
-        (dispatch: Dispatch<Action>, getState: () => GameState) => {
-            const state = getState()
+    (playerWhoTargets: string, targetedPlayer: string): ThunkAction<void, RootState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => RootState) => {
+            const state = getState().gameReducer
             const playersWhoTarget = Object.keys(state.Targets)
 
-            if (state.Targets[accusedPlayer] == playerWhoAccuses) {
-                dispatch(GameAddAccusation(playerWhoAccuses, accusedPlayer))
-                dispatch(GameRemoveTarget(accusedPlayer))
+            if (state.Targets[playerWhoTargets] == targetedPlayer) {
+                dispatch(GameAddAccusation(playerWhoTargets, targetedPlayer))
+                dispatch(GameRemoveTarget(playerWhoTargets))
 
                 // The last targeted players chooses to accuse
-                if (playersWhoTarget.length == 1 && playersWhoTarget[0] == accusedPlayer) {
+                if (playersWhoTarget.length == 1 && playersWhoTarget[0] == playerWhoTargets) {
                     dispatch(GameSetStep(GameStep.Deny))
                 }
             }
         }
 
 export const ThunkAcceptToDrink =
-    (playerWhoAccepts: string, playerWhoTargets: string): ThunkAction<void, GameState, unknown, Action<string>> =>
-        (dispatch: Dispatch<Action>, getState: () => GameState) => {
-            const state = getState()
+    (playerWhoTargets: string, targetedPlayer: string): ThunkAction<void, RootState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => RootState) => {
+            const state = getState().gameReducer
             const playersWhoTarget = Object.keys(state.Targets)
 
-            if (state.Targets[playerWhoTargets] == playerWhoAccepts) {
-                dispatch(GameAddSips(playerWhoAccepts, 1))
+            if (state.Targets[playerWhoTargets] == targetedPlayer) {
+                dispatch(GameAddSips(targetedPlayer, 1))
                 dispatch(GameRemoveTarget(playerWhoTargets))
 
                 // The last targeted players chooses to drink
@@ -64,14 +65,14 @@ export const ThunkAcceptToDrink =
             }
         }
 
-export const ThunkProveNotLying =
-    (accusedPlayer: string, playerWhoAccuses: string): ThunkAction<void, GameState, unknown, Action<string>> =>
-        (dispatch: Dispatch<Action>, getState: () => GameState) => {
-            const state = getState()
+export const ThunkProveNotToLie =
+    (playerWhoTargets: string, targetedPlayer: string): ThunkAction<void, RootState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => RootState) => {
+            const state = getState().gameReducer
 
-            if (state.Accusations[playerWhoAccuses] == accusedPlayer) {
-                dispatch(GameAddSips(playerWhoAccuses, 2))
-                dispatch(GameRemoveAccusation(playerWhoAccuses))
+            if (state.Accusations[playerWhoTargets] == targetedPlayer) {
+                dispatch(GameAddSips(targetedPlayer, 2))
+                dispatch(GameRemoveAccusation(playerWhoTargets))
 
                 // Last accusation is being resolved -> drinking step
                 if (Object.keys(state.Accusations).length == 1) {
@@ -81,13 +82,13 @@ export const ThunkProveNotLying =
         }
 
 export const ThunkAdmitToLying =
-    (accusedPlayer: string, playerWhoAccuses: string): ThunkAction<void, GameState, unknown, Action<string>> =>
-        (dispatch: Dispatch<Action>, getState: () => GameState) => {
-            const state = getState()
+    (playerWhoTargets: string, targetedPlayer: string): ThunkAction<void, RootState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => RootState) => {
+            const state = getState().gameReducer
 
-            if (state.Accusations[playerWhoAccuses] == accusedPlayer) {
-                dispatch(GameAddSips(accusedPlayer, 2))
-                dispatch(GameRemoveAccusation(playerWhoAccuses))
+            if (state.Accusations[playerWhoTargets] == targetedPlayer) {
+                dispatch(GameAddSips(playerWhoTargets, 2))
+                dispatch(GameRemoveAccusation(playerWhoTargets))
 
                 // Last accusation is being resolved -> drinking step
                 if (Object.keys(state.Accusations).length == 1) {
@@ -97,9 +98,9 @@ export const ThunkAdmitToLying =
         }
 
 export const ThunkDrink =
-    (player: string): ThunkAction<void, GameState, unknown, Action<string>> =>
-        (dispatch: Dispatch<Action>, getState: () => GameState) => {
-            const state = getState()
+    (player: string): ThunkAction<void, RootState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => RootState) => {
+            const state = getState().gameReducer
             const players = [...state.Players]
             const playersDoneDrinking = [...state.DoneDrinking, player]
 

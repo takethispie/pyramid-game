@@ -5,7 +5,7 @@ import {
     ThunkAcceptToDrink,
     ThunkDrink,
     ThunkAdmitToLying,
-    ThunkProveNotLying as ThunkProveNotToLie
+    ThunkProveNotToLie
 } from './game.thunk'
 import configureMockStore, { MockStore } from 'redux-mock-store'
 import thunk from 'redux-thunk'
@@ -31,8 +31,10 @@ describe('given a game in the target choosing step', () => {
 
     beforeEach(() => {
         store = mockStore({
-            CurrentStep: GameStep.ChooseTarget
-            , Players: new Set(['player1', 'player2', 'player3'])
+            gameReducer: {
+                CurrentStep: GameStep.ChooseTarget
+                , Players: new Set(['player1', 'player2', 'player3'])
+            }
         })
     })
 
@@ -40,8 +42,10 @@ describe('given a game in the target choosing step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Targets: {}
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {}
+                }
             })
             ThunkChooseTarget('player1', 'player2')(store.dispatch, store.getState, null)
         })
@@ -59,10 +63,12 @@ describe('given a game in the target choosing step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Targets: {
-                    'player2': 'player3',
-                    'player3': 'player2',
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {
+                        'player2': 'player3',
+                        'player3': 'player2',
+                    }
                 }
             })
             ThunkChooseTarget('player1', 'player2')(store.dispatch, store.getState, null)
@@ -80,12 +86,14 @@ describe('given a game in the accuse step', () => {
 
     beforeEach(() => {
         store = mockStore({
-            CurrentStep: GameStep.ChooseTarget
-            , Players: new Set(['player1', 'player2', 'player3'])
-            , Targets: {
-                'player1': 'player2',
-                'player2': 'player3',
-                'player3': 'player2'
+            gameReducer: {
+                CurrentStep: GameStep.ChooseTarget
+                , Players: new Set(['player1', 'player2', 'player3'])
+                , Targets: {
+                    'player1': 'player2',
+                    'player2': 'player3',
+                    'player3': 'player2'
+                }
             }
         })
     })
@@ -93,11 +101,11 @@ describe('given a game in the accuse step', () => {
     describe('when a player accuses another player of lying', () => {
 
         beforeEach(() => {
-            ThunkAccuse('player2', 'player1')(store.dispatch, store.getState, null)
+            ThunkAccuse('player1', 'player2')(store.dispatch, store.getState, null)
         })
 
         it('then the accusation is added to the accusation list', () => {
-            expect(store.getActions()).toContainEqual(GameAddAccusation('player2', 'player1'))
+            expect(store.getActions()).toContainEqual(GameAddAccusation('player1', 'player2'))
         })
 
         it('then the target is removed from the target list', () => {
@@ -108,7 +116,7 @@ describe('given a game in the accuse step', () => {
     describe('when a player acusses another player of lying, but the other player did not target the accuser', () => {
 
         beforeEach(() => {
-            ThunkAccuse('player1', 'player2')(store.dispatch, store.getState, null)
+            ThunkAccuse('player2', 'player1')(store.dispatch, store.getState, null)
         })
 
         it('then nothing happens', () => {
@@ -119,7 +127,7 @@ describe('given a game in the accuse step', () => {
     describe('when a targeted player chooses to drink', () => {
 
         beforeEach(() => {
-            ThunkAcceptToDrink('player2', 'player1')(store.dispatch, store.getState, null)
+            ThunkAcceptToDrink('player1', 'player2')(store.dispatch, store.getState, null)
         })
 
         it('the number of sips of the player is incremented', () => {
@@ -134,7 +142,7 @@ describe('given a game in the accuse step', () => {
     describe('when a player chooses to drink, but the other player did not target the player', () => {
 
         beforeEach(() => {
-            ThunkAcceptToDrink('player1', 'player2')(store.dispatch, store.getState, null)
+            ThunkAcceptToDrink('player2', 'player1')(store.dispatch, store.getState, null)
         })
 
         it('then nothing happens', () => {
@@ -146,16 +154,18 @@ describe('given a game in the accuse step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Targets: {
-                    'player2': 'player3'
-                }
-                , Accusations: {
-                    'player2': 'player1',
-                    'player3': 'player2'
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {
+                        'player2': 'player3'
+                    }
+                    , Accusations: {
+                        'player2': 'player1',
+                        'player3': 'player2'
+                    }
                 }
             })
-            ThunkAccuse('player3', 'player2')(store.dispatch, store.getState, null)
+            ThunkAccuse('player2', 'player3')(store.dispatch, store.getState, null)
         })
 
         it('then the game moves to the denying step', () => {
@@ -167,13 +177,15 @@ describe('given a game in the accuse step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Targets: {
-                    'player2': 'player3'
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {
+                        'player2': 'player3'
+                    }
+                    , Accusations: {}
                 }
-                , Accusations: {}
             })
-            ThunkAcceptToDrink('player3', 'player2')(store.dispatch, store.getState, null)
+            ThunkAcceptToDrink('player2', 'player3')(store.dispatch, store.getState, null)
         })
 
         it('then the game moves to the drinking step', () => {
@@ -185,15 +197,17 @@ describe('given a game in the accuse step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Targets: {
-                    'player3': 'player2'
-                }
-                , Accusations: {
-                    'player3': 'player2'
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {
+                        'player3': 'player2'
+                    }
+                    , Accusations: {
+                        'player2': 'player3'
+                    }
                 }
             })
-            ThunkAcceptToDrink('player2', 'player3')(store.dispatch, store.getState, null)
+            ThunkAcceptToDrink('player3', 'player2')(store.dispatch, store.getState, null)
         })
 
         it('then the game moves to the denying step', () => {
@@ -208,15 +222,17 @@ describe('given a game in the deny step', () => {
 
     beforeEach(() => {
         store = mockStore({
-            CurrentStep: GameStep.Deny
-            , Players: new Set([
-                'accuser1'
-                , 'accused1'
-                , 'accuser2'
-                , 'accused2'
-                , 'non-accused'
-                , 'non-accuser'
-            ])
+            gameReducer: {
+                CurrentStep: GameStep.Deny
+                , Players: new Set([
+                    'accuser1'
+                    , 'accused1'
+                    , 'accuser2'
+                    , 'accused2'
+                    , 'non-accused'
+                    , 'non-accuser'
+                ])
+            }
         })
     })
 
@@ -224,10 +240,12 @@ describe('given a game in the deny step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Accusations: {
-                    'accuser1': 'accused1',
-                    'accuser2': 'accused2',
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Accusations: {
+                        'accused1': 'accuser1',
+                        'accused2': 'accuser2',
+                    }
                 }
             })
         })
@@ -243,7 +261,7 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
+                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accused1'))
             })
 
             it('then the game remains in the deny step', () => {
@@ -262,7 +280,7 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
+                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accused1'))
             })
 
             it('then the game remains in the deny step', () => {
@@ -297,9 +315,11 @@ describe('given a game in the deny step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Accusations: {
-                    'accuser1': 'accused1'
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Accusations: {
+                        'accused1': 'accuser1'
+                    }
                 }
             })
         })
@@ -315,7 +335,7 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
+                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accused1'))
             })
 
             it('then the game moves to the drinking step', () => {
@@ -334,7 +354,7 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
+                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accused1'))
             })
 
             it('then the game moves to the drinking step', () => {
@@ -372,9 +392,11 @@ describe('given a game in the drinking step', () => {
 
     beforeEach(() => {
         store = mockStore({
-            CurrentStep: GameStep.Drink
-            , Players: new Set(['player1', 'player2', 'player3'])
-            , DoneDrinking: new Set
+            gameReducer: {
+                CurrentStep: GameStep.Drink
+                , Players: new Set(['player1', 'player2', 'player3'])
+                , DoneDrinking: new Set
+            }
         })
     })
 
@@ -397,8 +419,10 @@ describe('given a game in the drinking step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , DoneDrinking: new Set(['player2', 'player3'])
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , DoneDrinking: new Set(['player2', 'player3'])
+                }
             })
             ThunkDrink('player1')(store.dispatch, store.getState, null)
         })
@@ -411,6 +435,9 @@ describe('given a game in the drinking step', () => {
             expect(store.getActions()).toContainEqual(GameResetDoneDrinking())
         })
     })
+
+    // TODO: last player with non-zero sips remaining
+    // TODO: drinking removes resets the sips
 })
 
 // TODO:
