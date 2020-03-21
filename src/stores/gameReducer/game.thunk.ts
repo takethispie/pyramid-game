@@ -8,7 +8,8 @@ import {
     GameRemoveTarget,
     GameAddSips,
     GameAddDoneDrinking,
-    GameResetDoneDrinking
+    GameResetDoneDrinking,
+    GameRemoveAccusation
 } from "./game.actions";
 
 export const ThunkChooseTarget =
@@ -59,6 +60,38 @@ export const ThunkAcceptToDrink =
                     } else {
                         dispatch(GameSetStep(GameStep.Deny))
                     }
+                }
+            }
+        }
+
+export const ThunkProveNotLying =
+    (accusedPlayer: string, playerWhoAccuses: string): ThunkAction<void, GameState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => GameState) => {
+            const state = getState()
+
+            if (state.Accusations[playerWhoAccuses] == accusedPlayer) {
+                dispatch(GameAddSips(playerWhoAccuses, 2))
+                dispatch(GameRemoveAccusation(playerWhoAccuses))
+
+                // Last accusation is being resolved -> drinking step
+                if (Object.keys(state.Accusations).length == 1) {
+                    dispatch(GameSetStep(GameStep.Drink))
+                }
+            }
+        }
+
+export const ThunkAdmitToLying =
+    (accusedPlayer: string, playerWhoAccuses: string): ThunkAction<void, GameState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => GameState) => {
+            const state = getState()
+
+            if (state.Accusations[playerWhoAccuses] == accusedPlayer) {
+                dispatch(GameAddSips(accusedPlayer, 2))
+                dispatch(GameRemoveAccusation(playerWhoAccuses))
+
+                // Last accusation is being resolved -> drinking step
+                if (Object.keys(state.Accusations).length == 1) {
+                    dispatch(GameSetStep(GameStep.Drink))
                 }
             }
         }
