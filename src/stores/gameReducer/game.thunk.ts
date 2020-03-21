@@ -3,8 +3,6 @@ import { GameState, GameStep } from "./game.state";
 import { Action, Dispatch } from "redux";
 import {
     GameAddTarget,
-    GameAcceptToDrink,
-    GameDrink,
     GameSetStep,
     GameAddAccusation,
     GameRemoveTarget,
