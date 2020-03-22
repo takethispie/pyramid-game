@@ -38,7 +38,7 @@ describe('given a game in the target choosing step', () => {
         })
     })
 
-    describe('when a player chooses its target (not the last one)', () => {
+    describe('but there is more than one player that did not choose its target', () => {
 
         beforeEach(() => {
             store = mockStore({
@@ -47,19 +47,26 @@ describe('given a game in the target choosing step', () => {
                     , Targets: {}
                 }
             })
-            ThunkChooseTarget('player1', 'player2')(store.dispatch, store.getState, null)
         })
 
-        it('then the target is added to the target list', () => {
-            expect(store.getActions()).toContainEqual(GameAddTarget('player1', 'player2'))
+        describe('when a player chooses its target', () => {
+
+            beforeEach(() => {
+                ThunkChooseTarget('player1', 'player2')(store.dispatch, store.getState, null)
+            })
+
+            it('then the target is added to the target list', () => {
+                expect(store.getActions()).toContainEqual(GameAddTarget('player1', 'player2'))
+            })
+
+            it('then the game remains in the target choosing step', () => {
+                expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
+            })
         })
 
-        it('then the game remains in the target choosing step', () => {
-            expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
-        })
     })
 
-    describe('when the last player chooses its target', () => {
+    describe('but there is only one player left that did not choose its target', () => {
 
         beforeEach(() => {
             store = mockStore({
@@ -71,12 +78,19 @@ describe('given a game in the target choosing step', () => {
                     }
                 }
             })
-            ThunkChooseTarget('player1', 'player2')(store.dispatch, store.getState, null)
         })
 
-        it('then the game moves to the accuse step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Accuse))
+        describe('when the player chooses its target', () => {
+
+            beforeEach(() => {
+                ThunkChooseTarget('player1', 'player2')(store.dispatch, store.getState, null)
+            })
+
+            it('then the game moves to the accuse step', () => {
+                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Accuse))
+            })
         })
+
     })
 })
 
@@ -89,68 +103,79 @@ describe('given a game in the accuse step', () => {
             gameReducer: {
                 CurrentStep: GameStep.ChooseTarget
                 , Players: new Set(['player1', 'player2', 'player3'])
-                , Targets: {
-                    'player1': 'player2',
-                    'player2': 'player3',
-                    'player3': 'player2'
-                }
             }
         })
     })
 
-    describe('when a player accuses another player of lying', () => {
+    describe('but there is more than one player that is still targeted', () => {
 
         beforeEach(() => {
-            ThunkAccuse('player1', 'player2')(store.dispatch, store.getState, null)
+            store = mockStore({
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {
+                        'player1': 'player2',
+                        'player2': 'player3',
+                        'player3': 'player2'
+                    }
+                }
+            })
         })
 
-        it('then the accusation is added to the accusation list', () => {
-            expect(store.getActions()).toContainEqual(GameAddAccusation('player1', 'player2'))
+        describe('when a player accuses another player of lying', () => {
+
+            beforeEach(() => {
+                ThunkAccuse('player1', 'player2')(store.dispatch, store.getState, null)
+            })
+
+            it('then the accusation is added to the accusation list', () => {
+                expect(store.getActions()).toContainEqual(GameAddAccusation('player1', 'player2'))
+            })
+
+            it('then the target is removed from the target list', () => {
+                expect(store.getActions()).toContainEqual(GameRemoveTarget('player1'))
+            })
         })
 
-        it('then the target is removed from the target list', () => {
-            expect(store.getActions()).toContainEqual(GameRemoveTarget('player1'))
+        describe('when a player acusses another player of lying, but the other player did not target the accuser', () => {
+
+            beforeEach(() => {
+                ThunkAccuse('player2', 'player1')(store.dispatch, store.getState, null)
+            })
+
+            it('then nothing happens', () => {
+                expect(store.getActions()).toEqual([])
+            })
+        })
+
+        describe('when a targeted player chooses to drink', () => {
+
+            beforeEach(() => {
+                ThunkAcceptToDrink('player1', 'player2')(store.dispatch, store.getState, null)
+            })
+
+            it('the number of sips of the player is incremented', () => {
+                expect(store.getActions()).toContainEqual(GameAddSips('player2', 1))
+            })
+
+            it('then the target is removed from the target list', () => {
+                expect(store.getActions()).toContainEqual(GameRemoveTarget('player1'))
+            })
+        })
+
+        describe('when a player chooses to drink, but the other player did not target the player', () => {
+
+            beforeEach(() => {
+                ThunkAcceptToDrink('player2', 'player1')(store.dispatch, store.getState, null)
+            })
+
+            it('then nothing happens', () => {
+                expect(store.getActions()).toEqual([])
+            })
         })
     })
 
-    describe('when a player acusses another player of lying, but the other player did not target the accuser', () => {
-
-        beforeEach(() => {
-            ThunkAccuse('player2', 'player1')(store.dispatch, store.getState, null)
-        })
-
-        it('then nothing happens', () => {
-            expect(store.getActions()).toEqual([])
-        })
-    })
-
-    describe('when a targeted player chooses to drink', () => {
-
-        beforeEach(() => {
-            ThunkAcceptToDrink('player1', 'player2')(store.dispatch, store.getState, null)
-        })
-
-        it('the number of sips of the player is incremented', () => {
-            expect(store.getActions()).toContainEqual(GameAddSips('player2', 1))
-        })
-
-        it('then the target is removed from the target list', () => {
-            expect(store.getActions()).toContainEqual(GameRemoveTarget('player1'))
-        })
-    })
-
-    describe('when a player chooses to drink, but the other player did not target the player', () => {
-
-        beforeEach(() => {
-            ThunkAcceptToDrink('player2', 'player1')(store.dispatch, store.getState, null)
-        })
-
-        it('then nothing happens', () => {
-            expect(store.getActions()).toEqual([])
-        })
-    })
-
-    describe('when the last player accuses another player of lying', () => {
+    describe('but only one targeted player is remaining', () => {
 
         beforeEach(() => {
             store = mockStore({
@@ -165,15 +190,21 @@ describe('given a game in the accuse step', () => {
                     }
                 }
             })
-            ThunkAccuse('player2', 'player3')(store.dispatch, store.getState, null)
         })
 
-        it('then the game moves to the denying step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Deny))
+        describe('when the player accuses another player of lying', () => {
+
+            beforeEach(() => {
+                ThunkAccuse('player2', 'player3')(store.dispatch, store.getState, null)
+            })
+
+            it('then the game moves to the denying step', () => {
+                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Deny))
+            })
         })
     })
 
-    describe('when all players choose to drink', () => {
+    describe('but only one targeted player is remaining and the other choose to drink', () => {
 
         beforeEach(() => {
             store = mockStore({
@@ -185,15 +216,21 @@ describe('given a game in the accuse step', () => {
                     , Accusations: {}
                 }
             })
-            ThunkAcceptToDrink('player2', 'player3')(store.dispatch, store.getState, null)
         })
 
-        it('then the game moves to the drinking step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Drink))
+        describe('when the player chooses to drink', () => {
+
+            beforeEach(() => {
+                ThunkAcceptToDrink('player2', 'player3')(store.dispatch, store.getState, null)
+            })
+
+            it('then the game moves to the drinking step', () => {
+                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Drink))
+            })
         })
     })
 
-    describe('when the last player chooses to drink but another player accused someone', () => {
+    describe('but only one targeted player is remaining and there exist an accusation', () => {
 
         beforeEach(() => {
             store = mockStore({
@@ -207,11 +244,17 @@ describe('given a game in the accuse step', () => {
                     }
                 }
             })
-            ThunkAcceptToDrink('player3', 'player2')(store.dispatch, store.getState, null)
         })
 
-        it('then the game moves to the denying step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Deny))
+        describe('when the player chooses to drink', () => {
+
+            beforeEach(() => {
+                ThunkAcceptToDrink('player3', 'player2')(store.dispatch, store.getState, null)
+            })
+
+            it('then the game moves to the denying step', () => {
+                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Deny))
+            })
         })
     })
 })
@@ -395,27 +438,38 @@ describe('given a game in the drinking step', () => {
             gameReducer: {
                 CurrentStep: GameStep.Drink
                 , Players: new Set(['player1', 'player2', 'player3'])
-                , DoneDrinking: new Set
             }
         })
     })
 
-    describe('when a player drinks (not the last one)', () => {
+    describe('but there is more than one player who has not yet drunk', () => {
 
         beforeEach(() => {
-            ThunkDrink('player1')(store.dispatch, store.getState, null)
+            store = mockStore({
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , DoneDrinking: new Set
+                }
+            })
         })
 
-        it('then the game remains in the drinking step', () => {
-            expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
-        })
+        describe('when a player drinks', () => {
 
-        it('the player who drank is added the to list of player done drinking', () => {
-            expect(store.getActions()).toContainEqual(GameAddDoneDrinking('player1'))
+            beforeEach(() => {
+                ThunkDrink('player1')(store.dispatch, store.getState, null)
+            })
+
+            it('then the game remains in the drinking step', () => {
+                expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
+            })
+
+            it('the player who drank is added the to list of player done drinking', () => {
+                expect(store.getActions()).toContainEqual(GameAddDoneDrinking('player1'))
+            })
         })
     })
 
-    describe('when the last player drinks', () => {
+    describe('but there is only one player who has not yet drunk', () => {
 
         beforeEach(() => {
             store = mockStore({
@@ -424,15 +478,21 @@ describe('given a game in the drinking step', () => {
                     , DoneDrinking: new Set(['player2', 'player3'])
                 }
             })
-            ThunkDrink('player1')(store.dispatch, store.getState, null)
         })
 
-        it('the game moves to the target choosing step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.ChooseTarget))
-        })
+        describe('when the last player drinks', () => {
 
-        it('the list of player done drinking is reseted', () => {
-            expect(store.getActions()).toContainEqual(GameResetDoneDrinking())
+            beforeEach(() => {
+                ThunkDrink('player1')(store.dispatch, store.getState, null)
+            })
+
+            it('the game moves to the target choosing step', () => {
+                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.ChooseTarget))
+            })
+
+            it('the list of player done drinking is reseted', () => {
+                expect(store.getActions()).toContainEqual(GameResetDoneDrinking())
+            })
         })
     })
 
