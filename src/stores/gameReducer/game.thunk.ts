@@ -7,9 +7,8 @@ import {
     GameAddAccusation,
     GameRemoveTarget,
     GameAddSips,
-    GameAddDoneDrinking,
-    GameResetDoneDrinking,
-    GameRemoveAccusation
+    GameRemoveAccusation,
+    GameResetSips
 } from "./game.actions";
 import { RootState } from "stores/root.reducer";
 
@@ -102,11 +101,12 @@ export const ThunkDrink =
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const state = getState().gameReducer
             const players = [...state.Players]
-            const playersDoneDrinking = [...state.DoneDrinking, player]
+            const playersDoneDrinking =
+                players.filter(player => state.Sips[player] == undefined || state.Sips[player] == 0)
+            playersDoneDrinking.push(player)
 
-            dispatch(GameAddDoneDrinking(player))
+            dispatch(GameResetSips(player))
             if (players.every(x => playersDoneDrinking.includes(x))) {
                 dispatch(GameSetStep(GameStep.ChooseTarget))
-                dispatch(GameResetDoneDrinking())
             }
         }

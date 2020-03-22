@@ -7,8 +7,7 @@ import {
     GAME_ADD_ACCUSATION,
     GAME_REMOVE_ACCUSATION,
     GAME_ADD_SIPS,
-    GAME_ADD_DONE_DRINKING,
-    GAME_RESET_DONE_DRINKING
+    GAME_RESET_SIPS
 } from './game.actions';
 
 export const defaultGameState: GameState = {
@@ -16,8 +15,7 @@ export const defaultGameState: GameState = {
     Players: new Set(['player1', 'player2', 'player3']),
     Targets: {},
     Accusations: {},
-    Sips: {},
-    DoneDrinking: new Set
+    Sips: {}
 };
 
 const GameReducer = (state: GameState = defaultGameState, action: GameActionsTypes): GameState => {
@@ -64,29 +62,29 @@ const GameReducer = (state: GameState = defaultGameState, action: GameActionsTyp
             }
 
         case GAME_ADD_SIPS:
-            let newSips = { ...state.Sips }
-            if (!(action.payload.player in newSips)) {
+            {
+                let newSips = { ...state.Sips }
+                if (!(action.payload.player in newSips)) {
+                    newSips[action.payload.player] = 0
+                }
+                newSips[action.payload.player] += action.payload.numberOfSips
+                return {
+                    ...state
+                    , Sips: newSips
+                }
+            }
+
+        case GAME_RESET_SIPS:
+            {
+                let newSips = { ...state.Sips }
+                if (!(action.payload.player in newSips)) {
+                    newSips[action.payload.player] = 0
+                }
                 newSips[action.payload.player] = 0
-            }
-            newSips[action.payload.player] += action.payload.numberOfSips
-            return {
-                ...state
-                , Sips: newSips
-            }
-
-        case GAME_ADD_DONE_DRINKING:
-            return {
-                ...state
-                , DoneDrinking: new Set([
-                    ...state.DoneDrinking
-                    , action.payload.player
-                ])
-            }
-
-        case GAME_RESET_DONE_DRINKING:
-            return {
-                ...state
-                , DoneDrinking: new Set
+                return {
+                    ...state
+                    , Sips: newSips
+                }
             }
 
         default:

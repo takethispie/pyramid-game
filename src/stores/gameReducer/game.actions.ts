@@ -127,37 +127,22 @@ export function GameAddSips(player: string, numberOfSips: number): GameAddSipsAc
     }
 }
 
-// ----- GAME_ADD_DONE_DRINKING -----
+// ----- GAME_RESET_SIPS -----
 
-export const GAME_ADD_DONE_DRINKING = "GAME_ADD_DONE_DRINKING"
-interface GameAddDoneDrinkingAction {
-    type: typeof GAME_ADD_DONE_DRINKING,
+export const GAME_RESET_SIPS = "GAME_RESET_SIPS"
+interface GameResetSipsAction {
+    type: typeof GAME_RESET_SIPS,
     payload: {
         player: string
     }
 }
 
-export function GameAddDoneDrinking(player: string): GameAddDoneDrinkingAction {
+export function GameResetSips(player: string): GameResetSipsAction {
     return {
-        type: GAME_ADD_DONE_DRINKING,
+        type: GAME_RESET_SIPS,
         payload: {
             player
         }
-    }
-}
-
-// ----- GAME_RESET_DONE_DRINKING -----
-
-export const GAME_RESET_DONE_DRINKING = "GAME_RESET_DONE_DRINKING"
-interface GameResetDoneDrinkingAction {
-    type: typeof GAME_RESET_DONE_DRINKING,
-    payload: {}
-}
-
-export function GameResetDoneDrinking(): GameResetDoneDrinkingAction {
-    return {
-        type: GAME_RESET_DONE_DRINKING,
-        payload: {}
     }
 }
 
@@ -170,5 +155,4 @@ export type GameActionsTypes
     | GameAddAccusationAction
     | GameRemoveAccusationAction
     | GameAddSipsAction
-    | GameAddDoneDrinkingAction
-    | GameResetDoneDrinkingAction
+    | GameResetSipsAction

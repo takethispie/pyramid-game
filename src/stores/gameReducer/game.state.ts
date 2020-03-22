@@ -10,6 +10,5 @@ export interface GameState {
     Players: Set<string>,
     Targets: { [id: string]: string },
     Accusations: { [id: string]: string },
-    Sips: { [id: string]: number },
-    DoneDrinking: Set<string>
+    Sips: { [id: string]: number }
 }

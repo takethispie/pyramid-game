@@ -11,7 +11,6 @@ const mapState = (state: RootState) => ({
   , targets: state.gameReducer.Targets
   , accusations: state.gameReducer.Accusations
   , sips: state.gameReducer.Sips
-  , doneDrinking: state.gameReducer.DoneDrinking
 });
 
 const mapDispatch = {
@@ -35,7 +34,6 @@ const GamePoc: React.FC<Props> = ({
   , targets
   , accusations
   , sips
-  , doneDrinking
   , chooseTarget
   , accuse
   , acceptToDrink
@@ -104,7 +102,7 @@ const GamePoc: React.FC<Props> = ({
         break
 
       case GameStep.Drink:
-        if (sips[player] > 0) {
+        if (sips[player] != undefined && sips[player] > 0) {
           controls =
             <div>
               You have to drink {sips[player]} sips
@@ -136,8 +134,6 @@ const GamePoc: React.FC<Props> = ({
       {objectToComponent(accusations)}
       <p>Sips:</p>
       {objectToComponent(sips)}
-      <p>Done drinking:</p>
-      {setToComponent(doneDrinking)}
     </div>
 
   return (

@@ -5,9 +5,8 @@ import {
     GameSetStep,
     GameAddAccusation,
     GameAddSips,
-    GameAddDoneDrinking,
-    GameResetDoneDrinking,
-    GameRemoveAccusation
+    GameRemoveAccusation,
+    GameResetSips
 } from './game.actions'
 import GameReducer, { defaultGameState } from './game.reducer'
 
@@ -173,30 +172,20 @@ describe('given status that does not have a player in its sips dictionary', () =
     })
 })
 
-describe('when the game reducer receives a GAME_ADD_DONE_DRINKING', () => {
-    it('then it adds the player to the done drinking list', () => {
+describe('when the game reducer receives a GAME_RESET_SIPS', () => {
+    it('then it sets the number of sips of the player to zero', () => {
         expect(
             GameReducer({
                 ...defaultGameState
-                , DoneDrinking: new Set
-            }, GameAddDoneDrinking('player'))
+                , Sips: {
+                    'player': 3
+                }
+            }, GameResetSips('player'))
         ).toEqual({
             ...defaultGameState
-            , DoneDrinking: new Set(['player'])
-        })
-    })
-})
-
-describe('when the game reducer receives a GAME_RESET_DONE_DRINKING', () => {
-    it('then it resets the done drinking list', () => {
-        expect(
-            GameReducer({
-                ...defaultGameState
-                , DoneDrinking: new Set(['player1', 'player2'])
-            }, GameResetDoneDrinking())
-        ).toEqual({
-            ...defaultGameState
-            , DoneDrinking: new Set
+            , Sips: {
+                'player': 0
+            }
         })
     })
 })

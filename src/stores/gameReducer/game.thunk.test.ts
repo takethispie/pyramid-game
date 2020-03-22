@@ -16,9 +16,8 @@ import {
     GameAddAccusation,
     GameAddSips,
     GAME_SET_STEP,
-    GameAddDoneDrinking,
-    GameResetDoneDrinking,
-    GameRemoveAccusation
+    GameRemoveAccusation,
+    GameResetSips
 } from './game.actions'
 
 const middlewares = [thunk]
@@ -448,7 +447,11 @@ describe('given a game in the drinking step', () => {
             store = mockStore({
                 gameReducer: {
                     ...store.getState().gameReducer
-                    , DoneDrinking: new Set
+                    , Sips: {
+                        'player1': 1
+                        , 'player2': 1
+                        , 'player3': 1
+                    }
                 }
             })
         })
@@ -463,8 +466,8 @@ describe('given a game in the drinking step', () => {
                 expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
             })
 
-            it('the player who drank is added the to list of player done drinking', () => {
-                expect(store.getActions()).toContainEqual(GameAddDoneDrinking('player1'))
+            it('the sips number of the player is reset', () => {
+                expect(store.getActions()).toContainEqual(GameResetSips('player1'))
             })
         })
     })
@@ -475,7 +478,11 @@ describe('given a game in the drinking step', () => {
             store = mockStore({
                 gameReducer: {
                     ...store.getState().gameReducer
-                    , DoneDrinking: new Set(['player2', 'player3'])
+                    , Sips: {
+                        'player1': 1
+                        , 'player2': 0
+                        , 'player3': 0
+                    }
                 }
             })
         })
@@ -490,14 +497,40 @@ describe('given a game in the drinking step', () => {
                 expect(store.getActions()).toContainEqual(GameSetStep(GameStep.ChooseTarget))
             })
 
-            it('the list of player done drinking is reseted', () => {
-                expect(store.getActions()).toContainEqual(GameResetDoneDrinking())
+            it('the sips number of the player is reset', () => {
+                expect(store.getActions()).toContainEqual(GameResetSips('player1'))
             })
         })
     })
 
-    // TODO: last player with non-zero sips remaining
-    // TODO: drinking removes resets the sips
+    describe('but there is only one player who has not yet drunk, but some sips are undefined', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Sips: {
+                        'player1': 1
+                    }
+                }
+            })
+        })
+
+        describe('when the last player drinks', () => {
+
+            beforeEach(() => {
+                ThunkDrink('player1')(store.dispatch, store.getState, null)
+            })
+
+            it('the game moves to the target choosing step', () => {
+                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.ChooseTarget))
+            })
+
+            it('the sips number of the player is reset', () => {
+                expect(store.getActions()).toContainEqual(GameResetSips('player1'))
+            })
+        })
+    })
 })
 
 // TODO:
