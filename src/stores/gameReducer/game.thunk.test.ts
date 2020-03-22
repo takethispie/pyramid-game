@@ -3,7 +3,9 @@ import {
     ThunkChooseTarget,
     ThunkAccuse,
     ThunkAcceptToDrink,
-    ThunkDrink
+    ThunkDrink,
+    ThunkAdmitToLying,
+    ThunkProveNotLying as ThunkProveNotToLie
 } from './game.thunk'
 import configureMockStore, { MockStore } from 'redux-mock-store'
 import thunk from 'redux-thunk'
@@ -15,7 +17,8 @@ import {
     GameAddSips,
     GAME_SET_STEP,
     GameAddDoneDrinking,
-    GameResetDoneDrinking
+    GameResetDoneDrinking,
+    GameRemoveAccusation
 } from './game.actions'
 
 const middlewares = [thunk]
@@ -199,9 +202,169 @@ describe('given a game in the accuse step', () => {
     })
 })
 
-// TODO:
-// given a game in the deny step
-// ...
+describe('given a game in the deny step', () => {
+
+    let store: MockStore
+
+    beforeEach(() => {
+        store = mockStore({
+            CurrentStep: GameStep.Deny
+            , Players: new Set([
+                'accuser1'
+                , 'accused1'
+                , 'accuser2'
+                , 'accused2'
+                , 'non-accused'
+                , 'non-accuser'
+            ])
+        })
+    })
+
+    describe('but there are more that one accusation pending', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                ...store.getState()
+                , Accusations: {
+                    'accuser1': 'accused1',
+                    'accuser2': 'accused2',
+                }
+            })
+        })
+
+        describe('when an accused player proves not to lie', () => {
+
+            beforeEach(() => {
+                ThunkProveNotToLie('accused1', 'accuser1')(store.dispatch, store.getState, null)
+            })
+
+            it('then the accuser receives twice the sips', () => {
+                expect(store.getActions()).toContainEqual(GameAddSips('accuser1', 2))
+            })
+
+            it('then the accusation is removed from the list of accusations', () => {
+                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
+            })
+
+            it('then the game remains in the deny step', () => {
+                expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
+            })
+        })
+
+        describe('when an accused player admits to lying', () => {
+
+            beforeEach(() => {
+                ThunkAdmitToLying('accused1', 'accuser1')(store.dispatch, store.getState, null)
+            })
+
+            it('then the accused player receives twice the sips', () => {
+                expect(store.getActions()).toContainEqual(GameAddSips('accused1', 2))
+            })
+
+            it('then the accusation is removed from the list of accusations', () => {
+                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
+            })
+
+            it('then the game remains in the deny step', () => {
+                expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
+            })
+        })
+
+        describe('when a non-accused player tries to prove not lying', () => {
+
+            beforeEach(() => {
+                ThunkProveNotToLie('non-accused', 'non-accuser')(store.dispatch, store.getState, null)
+            })
+
+            it('then nothing happens', () => {
+                expect(store.getActions()).toEqual([])
+            })
+        })
+
+        describe('when a non-accused player tries to admit to lying', () => {
+
+            beforeEach(() => {
+                ThunkAdmitToLying('non-accused', 'non-accuser')(store.dispatch, store.getState, null)
+            })
+
+            it('then nothing happens', () => {
+                expect(store.getActions()).toEqual([])
+            })
+        })
+    })
+
+    describe('but there only one accusation pending', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                ...store.getState()
+                , Accusations: {
+                    'accuser1': 'accused1'
+                }
+            })
+        })
+
+        describe('when the accused player proves not to lie', () => {
+
+            beforeEach(() => {
+                ThunkProveNotToLie('accused1', 'accuser1')(store.dispatch, store.getState, null)
+            })
+
+            it('then the accuser receives twice the sips', () => {
+                expect(store.getActions()).toContainEqual(GameAddSips('accuser1', 2))
+            })
+
+            it('then the accusation is removed from the list of accusations', () => {
+                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
+            })
+
+            it('then the game moves to the drinking step', () => {
+                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Drink))
+            })
+        })
+
+        describe('when the accused player admits to lying', () => {
+
+            beforeEach(() => {
+                ThunkAdmitToLying('accused1', 'accuser1')(store.dispatch, store.getState, null)
+            })
+
+            it('then the accused player receives twice the sips', () => {
+                expect(store.getActions()).toContainEqual(GameAddSips('accused1', 2))
+            })
+
+            it('then the accusation is removed from the list of accusations', () => {
+                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
+            })
+
+            it('then the game moves to the drinking step', () => {
+                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Drink))
+            })
+        })
+
+        describe('when a non-accused player tries to prove not lying', () => {
+
+            beforeEach(() => {
+                ThunkProveNotToLie('non-accused', 'non-accuser')(store.dispatch, store.getState, null)
+            })
+
+            it('then nothing happens', () => {
+                expect(store.getActions()).toEqual([])
+            })
+        })
+
+        describe('when a non-accused player tries to admit to lying', () => {
+
+            beforeEach(() => {
+                ThunkAdmitToLying('non-accused', 'non-accuser')(store.dispatch, store.getState, null)
+            })
+
+            it('then nothing happens', () => {
+                expect(store.getActions()).toEqual([])
+            })
+        })
+    })
+})
 
 describe('given a game in the drinking step', () => {
 
