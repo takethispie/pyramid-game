@@ -45,27 +45,6 @@ export function GameRemoveTarget(
     }
 }
 
-// ----- GAME_SET_STEP -----
-
-export const GAME_SET_STEP = "GAME_SET_STEP"
-interface GameSetStepAction {
-    type: typeof GAME_SET_STEP,
-    payload: {
-        step: GameStep
-    }
-}
-
-export function GameSetStep(
-    step: GameStep
-): GameSetStepAction {
-    return {
-        type: GAME_SET_STEP,
-        payload: {
-            step
-        }
-    }
-}
-
 // ----- GAME_ADD_ACCUSATION -----
 
 export const GAME_ADD_ACCUSATION = "GAME_ADD_ACCUSATION"
@@ -151,7 +130,6 @@ export function GameResetSips(player: string): GameResetSipsAction {
 export type GameActionsTypes
     = GameAddTargetAction
     | GameRemoveTargetAction
-    | GameSetStepAction
     | GameAddAccusationAction
     | GameRemoveAccusationAction
     | GameAddSipsAction

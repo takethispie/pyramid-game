@@ -2,7 +2,6 @@ import { GameStep, GameState } from './game.state'
 import {
     GameAddTarget,
     GameRemoveTarget,
-    GameSetStep,
     GameAddAccusation,
     GameAddSips,
     GameRemoveAccusation,
@@ -38,20 +37,6 @@ describe('when the game reducer receives a GAME_REMOVE_TARGET', () => {
         ).toEqual({
             ...defaultGameState
             , Targets: {}
-        })
-    })
-})
-
-describe('when the game reducer receives a GAME_SET_STEP', () => {
-    it('then it sets the step', () => {
-        expect(
-            GameReducer({
-                ...defaultGameState
-                , CurrentStep: GameStep.ChooseTarget
-            }, GameSetStep(GameStep.Accuse))
-        ).toEqual({
-            ...defaultGameState
-            , CurrentStep: GameStep.Accuse
         })
     })
 })

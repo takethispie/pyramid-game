@@ -6,7 +6,6 @@ export enum GameStep {
 }
 
 export interface GameState {
-    CurrentStep: GameStep,
     Players: Set<string>,
     Targets: { [id: string]: string },
     Accusations: { [id: string]: string },

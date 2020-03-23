@@ -2,15 +2,15 @@ import { withRouter, RouteComponentProps } from "react-router";
 import { connect, ConnectedProps } from "react-redux";
 import React from "react";
 import { RootState } from "stores/root.reducer";
-import { GameStep } from "stores/gameReducer/game.state";
+import { GameStep, getStep } from "stores/gameReducer/game.state";
 import { ThunkChooseTarget, ThunkAccuse, ThunkAcceptToDrink, ThunkProveNotToLie, ThunkAdmitToLying, ThunkDrink } from "stores/gameReducer/game.thunk";
 
 const mapState = (state: RootState) => ({
   players: state.gameReducer.Players
-  , currentStep: state.gameReducer.CurrentStep
   , targets: state.gameReducer.Targets
   , accusations: state.gameReducer.Accusations
   , sips: state.gameReducer.Sips
+  , game: state.gameReducer
 });
 
 const mapDispatch = {
@@ -30,10 +30,10 @@ type Props = PropsFromRedux & RouteComponentProps & {};
 
 const GamePoc: React.FC<Props> = ({
   players
-  , currentStep
   , targets
   , accusations
   , sips
+  , game
   , chooseTarget
   , accuse
   , acceptToDrink
@@ -43,6 +43,7 @@ const GamePoc: React.FC<Props> = ({
 }) => {
 
   let playerControls = []
+  const currentStep = getStep(game)
   for (const player of players) {
     let controls
 

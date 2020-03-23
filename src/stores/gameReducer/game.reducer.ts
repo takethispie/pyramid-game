@@ -3,7 +3,6 @@ import {
     GameActionsTypes,
     GAME_ADD_TARGET,
     GAME_REMOVE_TARGET,
-    GAME_SET_STEP,
     GAME_ADD_ACCUSATION,
     GAME_REMOVE_ACCUSATION,
     GAME_ADD_SIPS,
@@ -11,7 +10,6 @@ import {
 } from './game.actions';
 
 export const defaultGameState: GameState = {
-    CurrentStep: GameStep.ChooseTarget,
     Players: new Set(['player1', 'player2', 'player3']),
     Targets: {},
     Accusations: {},
@@ -36,12 +34,6 @@ const GameReducer = (state: GameState = defaultGameState, action: GameActionsTyp
             return {
                 ...state
                 , Targets: newTargets
-            }
-
-        case GAME_SET_STEP:
-            return {
-                ...state
-                , CurrentStep: action.payload.step
             }
 
         case GAME_ADD_ACCUSATION:
