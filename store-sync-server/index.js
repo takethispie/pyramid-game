@@ -2,6 +2,12 @@ const express = require('express')
 const app = express()
 const port = 3200
 const actions = []
+const WebSocket = require('ws');
+
+const wss = new WebSocket.Server({ port: 3201 });
+wss.on('connection', function connection(ws) {
+    console.log('Connected: ' + ws)
+});
 
 app.use(require('body-parser').json())
 
@@ -12,13 +18,19 @@ app.post('/actions', (req, res) => {
         if (req.body.action.type != 'SYNC') {
             console.log('accepted -> push action')
             actions.push(req.body.action)
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send('SYNC');
+                }
+            });
         }
         res.end()
     } else {
-        console.log('client is out-of-date -> send history')
+        const start = index < actions.length ? index : 0
+        console.log('client is out-of-date -> send history starting at ' + start)
         res.status(409).json({
             index: index,
-            actions: actions.slice(index)
+            actions: actions.slice(start)
         })
     }
 })

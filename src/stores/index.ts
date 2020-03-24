@@ -4,6 +4,14 @@ import { composeWithDevTools } from 'redux-devtools-extension'
 import { rootReducer, defaultRootState, Sync } from './root.reducer'
 import axios from 'axios'
 
+const ws = new WebSocket('ws://localhost:3201');
+
+ws.onmessage = function (event) {
+  if (event.data == 'SYNC') {
+    store.dispatch(Sync())
+  }
+}
+
 function createActionSync(push: (index: number, action: Action) => Promise<any>, initialActionCount = 0): Middleware {
   let actionCount = initialActionCount
 
@@ -56,8 +64,7 @@ const store = createStore(
   )),
 )
 
-setInterval(() => {
-  store.dispatch(Sync())
-}, 1000)
+// Fetch the store on start
+store.dispatch(Sync())
 
 export default store
