@@ -5,9 +5,91 @@ import {
     GameAddAccusation,
     GameAddSips,
     GameRemoveAccusation,
-    GameResetSips
+    GameResetSips,
+    GameAddPlayer,
+    GameRemovePlayer
 } from './game.actions'
 import GameReducer, { defaultGameState } from './game.reducer'
+
+describe('when the game reducer receives a GAME_ADD_PLAYER', () => {
+
+    describe('but the player does not exist', () => {
+        let state: GameState
+
+        beforeEach(() => {
+            state = {
+                ...defaultGameState
+                , Players: new Set
+            }
+        })
+
+        it('then it adds the player to the players list', () => {
+            expect(
+                GameReducer(state, GameAddPlayer('player')).Players
+            ).toContainEqual('player')
+        })
+    })
+
+    describe('but the player already exists', () => {
+        let state: GameState
+
+        beforeEach(() => {
+            state = {
+                ...defaultGameState
+                , Players: new Set(['player'])
+            }
+        })
+
+        it('then it does nothing', () => {
+            expect(
+                GameReducer(state, GameAddPlayer('player'))
+            ).toEqual(state)
+        })
+    })
+})
+
+describe('when the game reducer receives a GAME_REMOVE_PLAYER', () => {
+
+    describe('but the player exists', () => {
+        let state: GameState
+
+        beforeEach(() => {
+            state = {
+                ...defaultGameState
+                , Players: new Set(['player', 'anotherPlayer'])
+            }
+        })
+
+        it('then it removes the player from the players list', () => {
+            expect(
+                GameReducer(state, GameRemovePlayer('player')).Players
+            ).not.toContainEqual('player')
+        })
+
+        it('then it does not remove the other players', () => {
+            expect(
+                GameReducer(state, GameRemovePlayer('player')).Players
+            ).toContainEqual('anotherPlayer')
+        })
+    })
+
+    describe('but the player does not exist', () => {
+        let state: GameState
+
+        beforeEach(() => {
+            state = {
+                ...defaultGameState
+                , Players: new Set
+            }
+        })
+
+        it('then it does nothing', () => {
+            expect(
+                GameReducer(state, GameRemovePlayer('playerName'))
+            ).toEqual(state)
+        })
+    })
+})
 
 describe('when the game reducer receives a GAME_ADD_TARGET', () => {
     it('then it adds a target to the target list', () => {

@@ -1,4 +1,44 @@
-import { GameStep } from "./game.state"
+// ----- GAME_ADD_PLAYER -----
+
+export const GAME_ADD_PLAYER = "GAME_ADD_PLAYER"
+interface GameAddPlayerAction {
+    type: typeof GAME_ADD_PLAYER,
+    payload: {
+        player: string
+    }
+}
+
+export function GameAddPlayer(
+    player: string
+): GameAddPlayerAction {
+    return {
+        type: GAME_ADD_PLAYER,
+        payload: {
+            player
+        }
+    }
+}
+
+// ----- GAME_REMOVE_PLAYER -----
+
+export const GAME_REMOVE_PLAYER = "GAME_REMOVE_PLAYER"
+interface GameRemovePlayerAction {
+    type: typeof GAME_REMOVE_PLAYER,
+    payload: {
+        player: string
+    }
+}
+
+export function GameRemovePlayer(
+    player: string
+): GameRemovePlayerAction {
+    return {
+        type: GAME_REMOVE_PLAYER,
+        payload: {
+            player
+        }
+    }
+}
 
 // ----- GAME_ADD_TARGET -----
 
@@ -128,7 +168,9 @@ export function GameResetSips(player: string): GameResetSipsAction {
 // -----
 
 export type GameActionsTypes
-    = GameAddTargetAction
+    = GameAddPlayerAction
+    | GameRemovePlayerAction
+    | GameAddTargetAction
     | GameRemoveTargetAction
     | GameAddAccusationAction
     | GameRemoveAccusationAction

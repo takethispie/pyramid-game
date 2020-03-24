@@ -6,18 +6,35 @@ import {
     GAME_ADD_ACCUSATION,
     GAME_REMOVE_ACCUSATION,
     GAME_ADD_SIPS,
-    GAME_RESET_SIPS
+    GAME_RESET_SIPS,
+    GAME_ADD_PLAYER,
+    GAME_REMOVE_PLAYER
 } from './game.actions';
 
 export const defaultGameState: GameState = {
-    Players: new Set(['player1', 'player2', 'player3']),
-    Targets: {},
-    Accusations: {},
-    Sips: {}
+    Players: new Set
+    , Targets: {}
+    , Accusations: {}
+    , Sips: {}
 };
 
 const GameReducer = (state: GameState = defaultGameState, action: GameActionsTypes): GameState => {
     switch (action.type) {
+
+        case GAME_ADD_PLAYER:
+            return {
+                ...state
+                , Players: new Set([
+                    ...state.Players
+                    , action.payload.player
+                ])
+            }
+
+        case GAME_REMOVE_PLAYER:
+            return {
+                ...state
+                , Players: new Set([...state.Players].filter(player => player != action.payload.player))
+            }
 
         case GAME_ADD_TARGET:
             return {
