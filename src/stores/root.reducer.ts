@@ -1,4 +1,4 @@
-import { combineReducers } from 'redux'
+import { combineReducers, Action } from 'redux'
 import MatchReducer, { defaultMatchState } from './matchReducer/match.reducer'
 import BoardReducer, { defaultBoardState } from './boardReducer/board.reducer'
 import GameReducer, { defaultGameState } from './gameReducer/game.reducer'
@@ -39,5 +39,22 @@ export const rootReducer = combineReducers({
     gameReducer: GameReducer,
     syncReducer: SyncReducer
 })
+
+export const MULTI_ACTION = "MULTI_ACTION"
+interface MultiActionAction {
+    type: typeof MULTI_ACTION,
+    payload: {
+        actions: Action[]
+    }
+}
+
+export function MultiAction(actions: Action[]): MultiActionAction {
+    return {
+        type: MULTI_ACTION,
+        payload: {
+            actions
+        }
+    }
+}
 
 export type RootState = ReturnType<typeof rootReducer>

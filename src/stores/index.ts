@@ -1,10 +1,10 @@
 import { createStore, applyMiddleware, Middleware, Action } from 'redux'
 import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
-import { rootReducer, defaultRootState, Sync } from './root.reducer'
+import { rootReducer, defaultRootState, Sync, MULTI_ACTION } from './root.reducer'
 import axios from 'axios'
 import { GameActionsTypes } from './gameReducer/game.actions'
-import { ThunkJoinGame } from './gameReducer/game.thunk'
+import { ThunkJoinGame, ThunkLeaveGame } from './gameReducer/game.thunk'
 import { ChangeNickName } from './matchReducer/match.actions'
 
 const ws = new WebSocket('ws://localhost:3201');
@@ -20,13 +20,11 @@ function createActionSync<ActionType>(push: (index: number, action: ActionType) 
 
   return () => next => action => {
     const process = (): Promise<void> => {
-      console.log('begin ' + action.type + ' (' + actionCount + ')')
       return push(actionCount, action).then(
         () => {
           if (action.type !== 'SYNC') {
             next(action)
             actionCount++
-            console.log('success ' + action.type + ', index = ' + actionCount)
             console.debug(store.getState())
           }
         },
@@ -37,7 +35,6 @@ function createActionSync<ActionType>(push: (index: number, action: ActionType) 
               if (actionCount == currentConflictIndex) {
                 next(conflict)
                 actionCount++
-                console.log('error ' + action.type + ', index = ' + actionCount + ' (applyed ' + conflict.type + ')')
               }
               currentConflictIndex++
             })
@@ -59,12 +56,23 @@ const pushGameAction = (index: number, action: GameActionsTypes): Promise<any> =
       throw Object.assign(error, { conflicts: error.response.data });
     })
 
+const multiAction: Middleware = () => next => action => {
+  if (action.type == MULTI_ACTION) {
+    for (const subAction of action.payload.actions) {
+      next(subAction)
+    }
+  } else {
+    next(action)
+  }
+}
+
 const store = createStore(
   rootReducer,
   defaultRootState,
   composeWithDevTools(applyMiddleware(
-    thunk,
-    createActionSync(pushGameAction)
+    thunk
+    , createActionSync(pushGameAction)
+    , multiAction
   )),
 )
 

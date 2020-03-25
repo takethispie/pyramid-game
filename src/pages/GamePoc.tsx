@@ -3,7 +3,8 @@ import { connect, ConnectedProps } from "react-redux";
 import React from "react";
 import { RootState } from "stores/root.reducer";
 import { GameStep, getStep } from "stores/gameReducer/game.state";
-import { ThunkChooseTarget, ThunkAccuse, ThunkAcceptToDrink, ThunkProveNotToLie, ThunkAdmitToLying, ThunkDrink } from "stores/gameReducer/game.thunk";
+import { ThunkChooseTarget, ThunkAccuse, ThunkAcceptToDrink, ThunkProveNotToLie, ThunkAdmitToLying, ThunkDrink, ThunkLeaveGame } from "stores/gameReducer/game.thunk";
+import { useBeforeunload } from 'react-beforeunload'
 
 const mapState = (state: RootState) => ({
   players: state.gameReducer.Players
@@ -21,6 +22,7 @@ const mapDispatch = {
   , proveNotToLie: ThunkProveNotToLie
   , admitToLying: ThunkAdmitToLying
   , drink: ThunkDrink
+  , leaveGame: ThunkLeaveGame
 };
 
 const connector = connect(mapState, mapDispatch);
@@ -42,7 +44,10 @@ const GamePoc: React.FC<Props> = ({
   , proveNotToLie
   , admitToLying
   , drink
+  , leaveGame
 }) => {
+
+  useBeforeunload(() => leaveGame());
 
   const currentStep = getStep(game)
   let controls

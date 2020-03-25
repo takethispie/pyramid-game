@@ -6,7 +6,8 @@ import {
     ThunkDrink,
     ThunkAdmitToLying,
     ThunkProveNotToLie,
-    ThunkJoinGame
+    ThunkJoinGame,
+    ThunkLeaveGame
 } from './game.thunk'
 import configureMockStore, { MockStore } from 'redux-mock-store'
 import thunk from 'redux-thunk'
@@ -17,8 +18,11 @@ import {
     GameAddSips,
     GameRemoveAccusation,
     GameResetSips,
-    GAME_ADD_PLAYER
+    GAME_ADD_PLAYER,
+    GAME_REMOVE_PLAYER
 } from './game.actions'
+import { defaultRootState } from 'stores/root.reducer'
+import { Action } from 'redux'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
@@ -95,11 +99,11 @@ describe('given a game in the accuse step', () => {
             })
 
             it('then the accusation is added to the accusation list', () => {
-                expect(store.getActions()).toContainEqual(GameAddAccusation('player1', 'player2'))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddAccusation('player1', 'player2'))
             })
 
             it('then the target is removed from the target list', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveTarget('player1'))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player1'))
             })
         })
 
@@ -121,11 +125,11 @@ describe('given a game in the accuse step', () => {
             })
 
             it('the number of sips of the player is incremented', () => {
-                expect(store.getActions()).toContainEqual(GameAddSips('player2', 1))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('player2', 1))
             })
 
             it('then the target is removed from the target list', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveTarget('player1'))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player1'))
             })
         })
 
@@ -182,11 +186,11 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accuser receives twice the sips', () => {
-                expect(store.getActions()).toContainEqual(GameAddSips('accuser1', 2))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('accuser1', 2))
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accused1'))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('accused1'))
             })
         })
 
@@ -197,11 +201,11 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accused player receives twice the sips', () => {
-                expect(store.getActions()).toContainEqual(GameAddSips('accused1', 2))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('accused1', 2))
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accused1'))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('accused1'))
             })
         })
 
@@ -248,11 +252,11 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accuser receives twice the sips', () => {
-                expect(store.getActions()).toContainEqual(GameAddSips('accuser1', 2))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('accuser1', 2))
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accused1'))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('accused1'))
             })
         })
 
@@ -263,11 +267,11 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accused player receives twice the sips', () => {
-                expect(store.getActions()).toContainEqual(GameAddSips('accused1', 2))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('accused1', 2))
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accused1'))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('accused1'))
             })
         })
 
@@ -387,23 +391,196 @@ describe('given a game in the drinking step', () => {
     })
 })
 
-describe('the connect thunk', () => {
-    let store: MockStore = mockStore({
-        matchReducer: {
-            NickName: "playerName"
-        }
-    })
+describe('given a game that the player did not join yet', () => {
+    let store: MockStore
 
     beforeEach(() => {
-        ThunkJoinGame()(store.dispatch, store.getState, undefined)
+        store = mockStore({
+            matchReducer: {
+                NickName: "playerName"
+            }
+        })
     })
 
-    it('adds a player to the players list', () => {
-        expect(store.getActions().filter(action => action.type == GAME_ADD_PLAYER)).not.toEqual([])
+    describe('when the player joins the game', () => {
+        beforeEach(() => {
+            ThunkJoinGame()(store.dispatch, store.getState, undefined)
+        })
+
+        it('adds a player to the players list', () => {
+            expect(store.getActions().filter(action => action.type == GAME_ADD_PLAYER)).not.toEqual([])
+        })
+
+        it('uses the player name', () => {
+            expect(store.getActions().filter(action => action.type == GAME_ADD_PLAYER)[0].payload.player).toEqual('playerName')
+        })
+    })
+})
+
+describe('given a game that the player has already joined', () => {
+    let store: MockStore
+
+    beforeEach(() => {
+        store = mockStore({
+            ...defaultRootState
+            , matchReducer: {
+                ...defaultRootState.matchReducer
+                , NickName: "player1"
+            }
+            , gameReducer: {
+                ...defaultRootState.gameReducer
+                , Players: new Set(['player1', 'player2', 'player3'])
+            }
+        })
     })
 
-    it('uses the player name', () => {
-        expect(store.getActions().filter(action => action.type == GAME_ADD_PLAYER)[0].payload.player).toEqual('playerName')
+    describe('when the leave game thunk is called', () => {
+
+        beforeEach(() => {
+            ThunkLeaveGame()(store.dispatch, store.getState, undefined)
+        })
+
+        it('then it removes the player from the players list', () => {
+            expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_REMOVE_PLAYER)).not.toEqual([])
+        })
+
+        it('then it uses the player nickname', () => {
+            expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_REMOVE_PLAYER)[0].payload.player).toEqual('player1')
+        })
+    })
+
+    describe('but the leaving player has a pending target', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                ...store.getState()
+                , gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {
+                        'player1': 'player2'
+                    }
+                }
+            })
+        })
+
+        describe('when the leave game thunk is called', () => {
+
+            beforeEach(() => {
+                ThunkLeaveGame()(store.dispatch, store.getState, undefined)
+            })
+
+            it('then it removes the pending target', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player1'))
+            })
+        })
+    })
+
+    describe('but the leaving player is targeted', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                ...store.getState()
+                , gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {
+                        'player2': 'player1'
+                        , 'player3': 'player1'
+                    }
+                }
+            })
+        })
+
+        describe('when the leave game thunk is called', () => {
+
+            beforeEach(() => {
+                ThunkLeaveGame()(store.dispatch, store.getState, undefined)
+            })
+
+            it('then it removes all targets targetting the leaving player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player2'))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player3'))
+            })
+        })
+    })
+
+    describe('but the leaving player has a pending accusation', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                ...store.getState()
+                , gameReducer: {
+                    ...store.getState().gameReducer
+                    , Accusations: {
+                        'player1': 'player2'
+                    }
+                }
+            })
+        })
+
+        describe('when the leave game thunk is called', () => {
+
+            beforeEach(() => {
+                ThunkLeaveGame()(store.dispatch, store.getState, undefined)
+            })
+
+            it('then it removes the pending accusation', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('player1'))
+            })
+        })
+    })
+
+    describe('but the leaving player accused other players', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                ...store.getState()
+                , gameReducer: {
+                    ...store.getState().gameReducer
+                    , Accusations: {
+                        'player2': 'player1'
+                        , 'player3': 'player1'
+                    }
+                }
+            })
+        })
+
+        describe('when the leave game thunk is called', () => {
+
+            beforeEach(() => {
+                ThunkLeaveGame()(store.dispatch, store.getState, undefined)
+            })
+
+            it('then it removes all targets targetting the leaving player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('player2'))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('player3'))
+            })
+        })
+    })
+
+    describe('but the leaving player has sips to drink', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                ...store.getState()
+                , gameReducer: {
+                    ...store.getState().gameReducer
+                    , Sips: {
+                        'player1': 1
+                    }
+                }
+            })
+        })
+
+        describe('when the leave game thunk is called', () => {
+
+            beforeEach(() => {
+                ThunkLeaveGame()(store.dispatch, store.getState, undefined)
+            })
+
+            it('then it resets the player\'s sips', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameResetSips('player1'))
+            })
+        })
     })
 })
 

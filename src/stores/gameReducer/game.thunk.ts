@@ -7,9 +7,10 @@ import {
     GameAddSips,
     GameRemoveAccusation,
     GameResetSips,
-    GameAddPlayer
+    GameAddPlayer,
+    GameRemovePlayer
 } from "./game.actions";
-import { RootState } from "stores/root.reducer";
+import { RootState, MultiAction } from "stores/root.reducer";
 
 export const ThunkChooseTarget =
     (playerWhoTargets: string, targetedPlayer: string): ThunkAction<void, RootState, unknown, Action<string>> =>
@@ -22,8 +23,10 @@ export const ThunkAccuse =
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const state = getState().gameReducer
             if (state.Targets[playerWhoTargets] == targetedPlayer) {
-                dispatch(GameAddAccusation(playerWhoTargets, targetedPlayer))
-                dispatch(GameRemoveTarget(playerWhoTargets))
+                dispatch(MultiAction([
+                    GameAddAccusation(playerWhoTargets, targetedPlayer)
+                    , GameRemoveTarget(playerWhoTargets)
+                ]))
             }
         }
 
@@ -32,8 +35,10 @@ export const ThunkAcceptToDrink =
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const state = getState().gameReducer
             if (state.Targets[playerWhoTargets] == targetedPlayer) {
-                dispatch(GameAddSips(targetedPlayer, 1))
-                dispatch(GameRemoveTarget(playerWhoTargets))
+                dispatch(MultiAction([
+                    GameAddSips(targetedPlayer, 1)
+                    , GameRemoveTarget(playerWhoTargets)
+                ]))
             }
         }
 
@@ -42,8 +47,10 @@ export const ThunkProveNotToLie =
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const state = getState().gameReducer
             if (state.Accusations[playerWhoTargets] == targetedPlayer) {
-                dispatch(GameAddSips(targetedPlayer, 2))
-                dispatch(GameRemoveAccusation(playerWhoTargets))
+                dispatch(MultiAction([
+                    GameAddSips(targetedPlayer, 2)
+                    , GameRemoveAccusation(playerWhoTargets)
+                ]))
             }
         }
 
@@ -52,8 +59,10 @@ export const ThunkAdmitToLying =
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const state = getState().gameReducer
             if (state.Accusations[playerWhoTargets] == targetedPlayer) {
-                dispatch(GameAddSips(playerWhoTargets, 2))
-                dispatch(GameRemoveAccusation(playerWhoTargets))
+                dispatch(MultiAction([
+                    GameAddSips(playerWhoTargets, 2)
+                    , GameRemoveAccusation(playerWhoTargets)
+                ]))
             }
         }
 
@@ -67,4 +76,41 @@ export const ThunkJoinGame =
     (): ThunkAction<void, RootState, unknown, Action<string>> =>
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             dispatch(GameAddPlayer(getState().matchReducer.NickName))
+        }
+
+export const ThunkLeaveGame =
+    (): ThunkAction<void, RootState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => RootState) => {
+            const nickName = getState().matchReducer.NickName
+            const targets = getState().gameReducer.Targets
+            const accusations = getState().gameReducer.Accusations
+            const sips = getState().gameReducer.Sips
+
+            let actions = []
+
+            if (targets[nickName] != undefined) {
+                actions.push(GameRemoveTarget(nickName))
+            }
+
+            const playersWhoTarget = Object.keys(targets).filter(key => targets[key] == nickName)
+            for (const playerWhoTargets of playersWhoTarget) {
+                actions.push(GameRemoveTarget(playerWhoTargets))
+            }
+
+            if (accusations[nickName] != undefined) {
+                actions.push(GameRemoveAccusation(nickName))
+            }
+
+            const accusedPlayers = Object.keys(accusations).filter(key => accusations[key] == nickName)
+            for (const accusedPlayer of accusedPlayers) {
+                actions.push(GameRemoveAccusation(accusedPlayer))
+            }
+
+            if (sips[nickName] > 0) {
+                actions.push(GameResetSips(nickName))
+            }
+
+            actions.push(GameRemovePlayer(nickName))
+
+            dispatch(MultiAction(actions))
         }
