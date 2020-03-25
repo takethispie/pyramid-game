@@ -8,7 +8,8 @@ import {
     GAME_ADD_SIPS,
     GAME_RESET_SIPS,
     GAME_ADD_PLAYER,
-    GAME_REMOVE_PLAYER
+    GAME_REMOVE_PLAYER,
+    GAME_KEEPALIVE
 } from './game.actions';
 
 export const defaultGameState: GameState = {
@@ -16,6 +17,7 @@ export const defaultGameState: GameState = {
     , Targets: {}
     , Accusations: {}
     , Sips: {}
+    , KeepAlive: {}
 };
 
 const GameReducer = (state: GameState = defaultGameState, action: GameActionsTypes): GameState => {
@@ -93,6 +95,14 @@ const GameReducer = (state: GameState = defaultGameState, action: GameActionsTyp
                 return {
                     ...state
                     , Sips: newSips
+                }
+            }
+
+        case GAME_KEEPALIVE:
+            return {
+                ...state
+                , KeepAlive: {
+                    [action.payload.player]: action.payload.date
                 }
             }
 

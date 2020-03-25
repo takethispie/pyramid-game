@@ -7,7 +7,8 @@ import {
     GameRemoveAccusation,
     GameResetSips,
     GameAddPlayer,
-    GameRemovePlayer
+    GameRemovePlayer,
+    GameKeepAlive
 } from './game.actions'
 import GameReducer, { defaultGameState } from './game.reducer'
 
@@ -253,6 +254,69 @@ describe('when the game reducer receives a GAME_RESET_SIPS', () => {
             , Sips: {
                 'player': 0
             }
+        })
+    })
+})
+
+describe('given a game with a player', () => {
+    let state: GameState
+
+    beforeEach(() => {
+        state = {
+            ...defaultGameState
+            , Players: new Set(['player'])
+        }
+    })
+
+    describe('but the player does not have a keepalive timer', () => {
+
+        describe('when the game reducer receives a GAME_KEEPALIVE', () => {
+            let newState: GameState
+            const date = new Date
+
+            beforeEach(() => {
+                newState = GameReducer(state, GameKeepAlive('player', date))
+            })
+
+            it('then it creates the keepalive timer of the player', () => {
+                expect(newState).toEqual({
+                    ...state
+                    , KeepAlive: {
+                        'player': date
+                    }
+                })
+            })
+        })
+    })
+
+    describe('but the player already has a keepalive timer', () => {
+        const date = new Date
+
+        beforeEach(() => {
+            state = {
+                ...state
+                , KeepAlive: {
+                    'player': new Date(date.getTime() - 1000)
+                }
+            }
+        })
+
+        describe('when the game reducer receives a GAME_KEEPALIVE', () => {
+            let newState: GameState
+            const date = new Date
+
+            beforeEach(() => {
+                newState = GameReducer(state, GameKeepAlive('player', date))
+            })
+
+            it('then it updates the keepalive timer of the player', () => {
+                expect(newState).toEqual({
+                    ...state
+                    , KeepAlive: {
+                        'player': date
+                    }
+                })
+            })
         })
     })
 })

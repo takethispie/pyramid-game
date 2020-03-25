@@ -8,7 +8,9 @@ import {
     GameRemoveAccusation,
     GameResetSips,
     GameAddPlayer,
-    GameRemovePlayer
+    GameRemovePlayer,
+    GameKeepAlive,
+    GameRemoveKeepAlive
 } from "./game.actions";
 import { RootState, MultiAction } from "stores/root.reducer";
 
@@ -75,7 +77,10 @@ export const ThunkDrink =
 export const ThunkJoinGame =
     (): ThunkAction<void, RootState, unknown, Action<string>> =>
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
-            dispatch(GameAddPlayer(getState().matchReducer.NickName))
+            dispatch(MultiAction([
+                GameAddPlayer(getState().matchReducer.NickName)
+                , GameKeepAlive(getState().matchReducer.NickName, new Date)
+            ]))
         }
 
 export const ThunkLeaveGame =
@@ -85,6 +90,7 @@ export const ThunkLeaveGame =
             const targets = getState().gameReducer.Targets
             const accusations = getState().gameReducer.Accusations
             const sips = getState().gameReducer.Sips
+            const keepAlive = getState().gameReducer.KeepAlive
 
             let actions = []
 
@@ -108,6 +114,10 @@ export const ThunkLeaveGame =
 
             if (sips[nickName] > 0) {
                 actions.push(GameResetSips(nickName))
+            }
+
+            if (keepAlive[nickName] != undefined) {
+                actions.push(GameRemoveKeepAlive(nickName))
             }
 
             actions.push(GameRemovePlayer(nickName))
