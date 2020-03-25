@@ -11,6 +11,7 @@ const mapState = (state: RootState) => ({
   , accusations: state.gameReducer.Accusations
   , sips: state.gameReducer.Sips
   , game: state.gameReducer
+  , nickName: state.matchReducer.NickName
 });
 
 const mapDispatch = {
@@ -34,6 +35,7 @@ const GamePoc: React.FC<Props> = ({
   , accusations
   , sips
   , game
+  , nickName
   , chooseTarget
   , accuse
   , acceptToDrink
@@ -42,84 +44,75 @@ const GamePoc: React.FC<Props> = ({
   , drink
 }) => {
 
-  let playerControls = []
   const currentStep = getStep(game)
-  for (const player of players) {
-    let controls
+  let controls
 
-    switch (currentStep) {
+  switch (currentStep) {
 
-      case GameStep.ChooseTarget:
-        let potentialTargetsButtons = []
-        for (const potentialTarget of players) {
-          if (potentialTarget != player) {
-            potentialTargetsButtons.push(<p><button onClick={() => chooseTarget(player, potentialTarget)}>{potentialTarget}</button></p>)
-          }
+    case GameStep.ChooseTarget:
+      let potentialTargetsButtons = []
+      for (const potentialTarget of players) {
+        if (potentialTarget != nickName) {
+          potentialTargetsButtons.push(<p><button onClick={() => chooseTarget(nickName, potentialTarget)}>{potentialTarget}</button></p>)
+        }
+      }
+      controls =
+        <div>
+          <p>Choose your target: </p>
+          {potentialTargetsButtons}
+        </div>
+      break
+
+    case GameStep.Accuse:
+      let targetedByList = Object.keys(targets).filter(key => targets[key] == nickName)
+      if (targetedByList.length == 0) {
+        controls =
+          <div>
+            <p>You are not targeted</p>
+          </div>
+      } else {
+        let targetedByComponents = []
+        for (const targetedBy of targetedByList) {
+          targetedByComponents.push(
+            <div>
+              You are targeted by {targetedBy}
+              <button onClick={() => accuse(targetedBy!, nickName)}>Accuse of lying</button>
+              <button onClick={() => acceptToDrink(targetedBy!, nickName)}>Accept to drink</button>
+            </div>
+          )
         }
         controls =
           <div>
-            <p>Choose your target: </p>
-            {potentialTargetsButtons}
+            {targetedByComponents}
           </div>
-        break
+      }
+      break
 
-      case GameStep.Accuse:
-        let targetedByList = Object.keys(targets).filter(key => targets[key] == player)
-        if (targetedByList.length == 0) {
-          controls =
-            <div>
-              <p>You are not targeted</p>
-            </div>
-        } else {
-          let targetedByComponents = []
-          for (const targetedBy of targetedByList) {
-            targetedByComponents.push(
-              <div>
-                You are targeted by {targetedBy}
-                <button onClick={() => accuse(targetedBy!, player)}>Accuse of lying</button>
-                <button onClick={() => acceptToDrink(targetedBy!, player)}>Accept to drink</button>
-              </div>
-            )
-          }
-          controls =
-            <div>
-              {targetedByComponents}
-            </div>
-        }
-        break
+    case GameStep.Deny:
+      let accuser = accusations[nickName]
+      if (accuser != undefined) {
+        controls =
+          <div>
+            {accuser} accuses you of lying!
+              <button onClick={() => proveNotToLie(nickName, accuser!)}>I have a card</button>
+            <button onClick={() => admitToLying(nickName, accuser!)}>I was lying</button>
+          </div>
+      } else {
+        controls = <p>Nothing to do</p>
+      }
+      break
 
-      case GameStep.Deny:
-        let accuser = accusations[player]
-        if (accuser != undefined) {
-          controls =
-            <div>
-              {accuser} accuses you of lying!
-              <button onClick={() => proveNotToLie(player, accuser!)}>I have a card</button>
-              <button onClick={() => admitToLying(player, accuser!)}>I was lying</button>
-            </div>
-        } else {
-          controls = <p>Nothing to do</p>
-        }
-        break
-
-      case GameStep.Drink:
-        if (sips[player] != undefined && sips[player] > 0) {
-          controls =
-            <div>
-              You have to drink {sips[player]} sips
-              <button onClick={() => drink(player)}>Done</button>
-            </div>
-        } else {
-          controls = <p>You don't drink (this time)</p>
-        }
-        break
-    }
-    playerControls.push(
-      <div>
-        <h2>{player}</h2>
-        {controls}
-      </div>
-    )
+    case GameStep.Drink:
+      if (sips[nickName] != undefined && sips[nickName] > 0) {
+        controls =
+          <div>
+            You have to drink {sips[nickName]} sips
+              <button onClick={() => drink(nickName)}>Done</button>
+          </div>
+      } else {
+        controls = <p>You don't drink (this time)</p>
+      }
+      break
   }
 
   const objectToComponent = (object: any) => Object.keys(object).map(key => <p>{key}: {object[key]}</p>)
@@ -128,6 +121,8 @@ const GamePoc: React.FC<Props> = ({
 
   let gameStateComponent =
     <div>
+      <p>Players:</p>
+      {setToComponent(players)}
       <p>Current step: {currentStep}</p>
       <p>Targets:</p>
       {objectToComponent(targets)}
@@ -139,9 +134,9 @@ const GamePoc: React.FC<Props> = ({
 
   return (
     <div>
-      <h1>Players</h1>
+      <h1>{nickName}</h1>
       <div>
-        {playerControls}
+        {controls}
       </div>
       <h1>Game state</h1>
       {gameStateComponent}

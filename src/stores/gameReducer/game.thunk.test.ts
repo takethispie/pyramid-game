@@ -5,7 +5,8 @@ import {
     ThunkAcceptToDrink,
     ThunkDrink,
     ThunkAdmitToLying,
-    ThunkProveNotToLie
+    ThunkProveNotToLie,
+    ThunkJoinGame
 } from './game.thunk'
 import configureMockStore, { MockStore } from 'redux-mock-store'
 import thunk from 'redux-thunk'
@@ -15,7 +16,8 @@ import {
     GameAddAccusation,
     GameAddSips,
     GameRemoveAccusation,
-    GameResetSips
+    GameResetSips,
+    GAME_ADD_PLAYER
 } from './game.actions'
 
 const middlewares = [thunk]
@@ -382,6 +384,26 @@ describe('given a game in the drinking step', () => {
                 expect(store.getActions()).toContainEqual(GameResetSips('player1'))
             })
         })
+    })
+})
+
+describe('the connect thunk', () => {
+    let store: MockStore = mockStore({
+        matchReducer: {
+            NickName: "playerName"
+        }
+    })
+
+    beforeEach(() => {
+        ThunkJoinGame()(store.dispatch, store.getState, undefined)
+    })
+
+    it('adds a player to the players list', () => {
+        expect(store.getActions().filter(action => action.type == GAME_ADD_PLAYER)).not.toEqual([])
+    })
+
+    it('uses the player name', () => {
+        expect(store.getActions().filter(action => action.type == GAME_ADD_PLAYER)[0].payload.player).toEqual('playerName')
     })
 })
 

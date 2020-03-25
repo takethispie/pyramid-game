@@ -1,5 +1,4 @@
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
-import { GameState, GameStep } from "./game.state";
+import { ThunkAction } from "redux-thunk";
 import { Action, Dispatch } from "redux";
 import {
     GameAddTarget,
@@ -7,7 +6,8 @@ import {
     GameRemoveTarget,
     GameAddSips,
     GameRemoveAccusation,
-    GameResetSips
+    GameResetSips,
+    GameAddPlayer
 } from "./game.actions";
 import { RootState } from "stores/root.reducer";
 
@@ -61,4 +61,10 @@ export const ThunkDrink =
     (player: string): ThunkAction<void, RootState, unknown, Action<string>> =>
         (dispatch: Dispatch<Action>) => {
             dispatch(GameResetSips(player))
+        }
+
+export const ThunkJoinGame =
+    (): ThunkAction<void, RootState, unknown, Action<string>> =>
+        (dispatch: Dispatch<Action>, getState: () => RootState) => {
+            dispatch(GameAddPlayer(getState().matchReducer.NickName))
         }

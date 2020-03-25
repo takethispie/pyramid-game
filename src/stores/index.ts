@@ -3,6 +3,9 @@ import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import { rootReducer, defaultRootState, Sync } from './root.reducer'
 import axios from 'axios'
+import { GameActionsTypes } from './gameReducer/game.actions'
+import { ThunkJoinGame } from './gameReducer/game.thunk'
+import { ChangeNickName } from './matchReducer/match.actions'
 
 const ws = new WebSocket('ws://localhost:3201');
 
@@ -12,7 +15,7 @@ ws.onmessage = function (event) {
   }
 }
 
-function createActionSync(push: (index: number, action: Action) => Promise<any>, initialActionCount = 0): Middleware {
+function createActionSync<ActionType>(push: (index: number, action: ActionType) => Promise<any>, initialActionCount = 0): Middleware {
   let actionCount = initialActionCount
 
   return () => next => action => {
@@ -24,6 +27,7 @@ function createActionSync(push: (index: number, action: Action) => Promise<any>,
             next(action)
             actionCount++
             console.log('success ' + action.type + ', index = ' + actionCount)
+            console.debug(store.getState())
           }
         },
         error => {
@@ -49,7 +53,7 @@ function createActionSync(push: (index: number, action: Action) => Promise<any>,
   }
 }
 
-const push = (index: number, action: any): Promise<any> =>
+const pushGameAction = (index: number, action: GameActionsTypes): Promise<any> =>
   axios.post('http://localhost:3000/actions', { index, action })
     .catch(error => {
       throw Object.assign(error, { conflicts: error.response.data });
@@ -60,11 +64,16 @@ const store = createStore(
   defaultRootState,
   composeWithDevTools(applyMiddleware(
     thunk,
-    createActionSync(push)
+    createActionSync(pushGameAction)
   )),
 )
 
 // Fetch the store on start
 store.dispatch(Sync())
+
+// TODO:
+// const playerName = 'player' + Math.round(Math.random() * 10000)
+// store.dispatch(ChangeNickName(playerName))
+ThunkJoinGame()(store.dispatch, store.getState, undefined)
 
 export default store
