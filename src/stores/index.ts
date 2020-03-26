@@ -1,61 +1,31 @@
 import { createStore, applyMiddleware, Middleware, Action } from 'redux'
 import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
-import { rootReducer, defaultRootState, Sync, MULTI_ACTION } from './root.reducer'
-import axios from 'axios'
-import { GameActionsTypes, GameKeepAlive } from './gameReducer/game.actions'
+import { rootReducer, defaultRootState, MULTI_ACTION, SYNC, Sync } from './root.reducer'
 import { ThunkJoinGame, ThunkLeaveGame, ThunkKickInactivePlayers, ThunkKeepAlive } from './gameReducer/game.thunk'
 import { ChangeNickName } from './matchReducer/match.actions'
 import { KEEPALIVE_TIMEOUT_MS } from './gameReducer/game.state'
 
-const ws = new WebSocket('ws://localhost:3201');
+const ws = new WebSocket('ws://localhost:3200');
 
 ws.onmessage = function (event) {
-  if (event.data == 'SYNC') {
-    store.dispatch(Sync())
-  }
+  store.dispatch(Sync(JSON.parse(event.data)))
 }
 
-function createActionSync<ActionType>(push: (index: number, action: ActionType) => Promise<any>, initialActionCount = 0): Middleware {
-  let actionCount = initialActionCount
-
-  return () => next => action => {
-    const process = (): Promise<void> => {
-      return push(actionCount, action).then(
-        () => {
-          if (action.type !== 'SYNC') {
-            next(action)
-            actionCount++
-            console.debug(store.getState())
-          }
-        },
-        error => {
-          if (error.response.status == 409) {
-            let currentConflictIndex = error.conflicts.index
-            error.conflicts.actions.forEach((conflict: Action) => {
-              if (actionCount == currentConflictIndex) {
-                next(conflict)
-                actionCount++
-              }
-              currentConflictIndex++
-            })
-            if (action.type !== 'SYNC') {
-              return process()
-            }
-          }
-        }
-      )
+const sync: Middleware = () => next => action => {
+  const send = async (action: Action) => {
+    while (ws.readyState === 0) {
+      await new Promise(r => setTimeout(r, 200))
     }
-
-    return process()
+    ws.send(JSON.stringify(action))
+  }
+  if (action.type === SYNC) {
+    next(action.payload.action)
+  } else {
+    send(action)
+    next(action)
   }
 }
-
-const pushGameAction = (index: number, action: GameActionsTypes): Promise<any> =>
-  axios.post('http://localhost:3000/actions', { index, action })
-    .catch(error => {
-      throw Object.assign(error, { conflicts: error.response.data });
-    })
 
 const multiAction: Middleware = () => next => action => {
   if (action.type == MULTI_ACTION) {
@@ -72,13 +42,10 @@ const store = createStore(
   defaultRootState,
   composeWithDevTools(applyMiddleware(
     thunk
-    , createActionSync(pushGameAction)
+    , sync
     , multiAction
   )),
 )
-
-// Fetch the store on start
-store.dispatch(Sync())
 
 // TODO:
 // const playerName = 'player' + Math.round(Math.random() * 10000)

@@ -12,17 +12,21 @@ export const defaultRootState = {
 
 interface SyncState { }
 
-const SYNC = 'SYNC'
+export const SYNC = 'SYNC'
 
 interface SyncAction {
     type: typeof SYNC,
-    payload: {}
+    payload: {
+        action: Action
+    }
 }
 
-export function Sync(): SyncAction {
+export function Sync(action: Action): SyncAction {
     return {
         type: SYNC,
-        payload: {}
+        payload: {
+            action
+        }
     }
 }
 
