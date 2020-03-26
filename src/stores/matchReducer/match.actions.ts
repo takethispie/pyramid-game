@@ -1,3 +1,5 @@
+import { GameActionsTypes } from "stores/gameReducer/game.actions";
+
 export const MATCH_CONNECT = "CONNECT";
 export const MATCH_CONNECT_SUCCESS = "MATCH_CONNECT_SUCCESS";
 export const MATCH_CONNECT_ERROR = "MATCH_CONNECT_ERROR";
@@ -34,7 +36,7 @@ export function ConnectMatch(id: string, nickname: string): MatchActionsTypes {
             nickname
         }
     }
-} 
+}
 
 export function ConnectMatchSuccess(id: string): MatchActionsTypes {
     return {
