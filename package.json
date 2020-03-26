@@ -61,6 +61,5 @@
       "last 1 safari version"
     ]
   },
-  "description": "An Ionic project",
-  "proxy": "http://localhost:3200"
+  "description": "An Ionic project"
 }

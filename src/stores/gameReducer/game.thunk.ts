@@ -12,8 +12,9 @@ import {
     GameKeepAlive,
     GameRemoveKeepAlive
 } from "./game.actions";
-import { RootState, MultiAction } from "stores/root.reducer";
+import { RootState } from "stores/root.reducer";
 import { KEEPALIVE_TIMEOUT_MS, getStep } from "./game.state";
+import { MultiAction } from "stores/multiActionMiddleware/multiAction.actions";
 
 export const ThunkChooseTarget =
     (playerWhoTargets: string, targetedPlayer: string): ThunkAction<void, RootState, unknown, Action<string>> =>

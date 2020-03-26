@@ -1,51 +1,26 @@
 import { createStore, applyMiddleware, Middleware, Action } from 'redux'
 import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
-import { rootReducer, defaultRootState, MULTI_ACTION, SYNC, Sync } from './root.reducer'
-import { ThunkJoinGame, ThunkLeaveGame, ThunkKickInactivePlayers, ThunkKeepAlive } from './gameReducer/game.thunk'
-import { ChangeNickName } from './matchReducer/match.actions'
+import { rootReducer, defaultRootState } from './root.reducer'
+import { ThunkJoinGame, ThunkKickInactivePlayers, ThunkKeepAlive } from './gameReducer/game.thunk'
 import { KEEPALIVE_TIMEOUT_MS } from './gameReducer/game.state'
-
-const ws = new WebSocket('ws://localhost:3200');
-
-ws.onmessage = function (event) {
-  store.dispatch(Sync(JSON.parse(event.data)))
-}
-
-const sync: Middleware = () => next => action => {
-  const send = async (action: Action) => {
-    while (ws.readyState === 0) {
-      await new Promise(r => setTimeout(r, 200))
-    }
-    ws.send(JSON.stringify(action))
-  }
-  if (action.type === SYNC) {
-    next(action.payload.action)
-  } else {
-    send(action)
-    next(action)
-  }
-}
-
-const multiAction: Middleware = () => next => action => {
-  if (action.type == MULTI_ACTION) {
-    for (const subAction of action.payload.actions) {
-      next(subAction)
-    }
-  } else {
-    next(action)
-  }
-}
+import { multiAction } from './multiActionMiddleware/multiAction.middleware'
+import createSyncMiddleware from './syncMiddleware/sync.middleware'
+import { Dispatch } from 'react'
 
 const store = createStore(
   rootReducer,
   defaultRootState,
   composeWithDevTools(applyMiddleware(
     thunk
-    , sync
+    , createSyncMiddleware('ws://localhost:3200', getDispatch)
     , multiAction
   )),
 )
+
+function getDispatch(): Dispatch<Action> {
+  return store.dispatch
+}
 
 // TODO:
 // const playerName = 'player' + Math.round(Math.random() * 10000)
