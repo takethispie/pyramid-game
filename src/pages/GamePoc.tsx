@@ -11,6 +11,7 @@ const mapState = (state: RootState) => ({
   , targets: state.gameReducer.Targets
   , accusations: state.gameReducer.Accusations
   , sips: state.gameReducer.Sips
+  , keepAlive: state.gameReducer.KeepAlive
   , game: state.gameReducer
   , nickName: state.matchReducer.NickName
 });
@@ -36,6 +37,7 @@ const GamePoc: React.FC<Props> = ({
   , targets
   , accusations
   , sips
+  , keepAlive
   , game
   , nickName
   , chooseTarget
@@ -120,7 +122,7 @@ const GamePoc: React.FC<Props> = ({
       break
   }
 
-  const objectToComponent = (object: any) => Object.keys(object).map(key => <p>{key}: {object[key]}</p>)
+  const objectToComponent = (object: any) => Object.keys(object).map(key => <p>{key}: {object[key].toString()}</p>)
 
   const setToComponent = (set: any) => [...set].map(value => <p>{value}</p>)
 
@@ -135,6 +137,8 @@ const GamePoc: React.FC<Props> = ({
       {objectToComponent(accusations)}
       <p>Sips:</p>
       {objectToComponent(sips)}
+      <p>KeepAlive:</p>
+      {objectToComponent(keepAlive)}
     </div>
 
   return (

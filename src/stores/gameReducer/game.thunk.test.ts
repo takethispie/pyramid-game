@@ -1,4 +1,4 @@
-import { GameStep } from './game.state'
+import { GameStep, KEEPALIVE_TIMEOUT_MS } from './game.state'
 import {
     ThunkChooseTarget,
     ThunkAccuse,
@@ -7,7 +7,9 @@ import {
     ThunkAdmitToLying,
     ThunkProveNotToLie,
     ThunkJoinGame,
-    ThunkLeaveGame
+    ThunkLeaveGame,
+    ThunkKickInactivePlayers,
+    ThunkKeepAlive
 } from './game.thunk'
 import configureMockStore, { MockStore } from 'redux-mock-store'
 import thunk from 'redux-thunk'
@@ -21,7 +23,9 @@ import {
     GAME_ADD_PLAYER,
     GAME_REMOVE_PLAYER,
     GAME_KEEPALIVE,
-    GameRemoveKeepAlive
+    GameRemoveKeepAlive,
+    GameRemovePlayer,
+    GameKeepAlive
 } from './game.actions'
 import { defaultRootState } from 'stores/root.reducer'
 import { Action } from 'redux'
@@ -401,6 +405,9 @@ describe('given a game that the player did not join yet', () => {
             matchReducer: {
                 NickName: "playerName"
             }
+            , gameReducer: {
+                Players: new Set(['anotherPlayer'])
+            }
         })
     })
 
@@ -409,16 +416,27 @@ describe('given a game that the player did not join yet', () => {
             ThunkJoinGame()(store.dispatch, store.getState, undefined)
         })
 
-        it('adds a player to the players list', () => {
+        it('then the player is added to the players list', () => {
             expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_ADD_PLAYER)).not.toEqual([])
         })
 
-        it('uses the player\'s nickname', () => {
+        it('then player\'s nickname is used', () => {
             expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_ADD_PLAYER)[0].payload.player).toEqual('playerName')
         })
 
-        it('updates its keepalive timer', () => {
+        it('then the player\'s keepalive timer is updated', () => {
             expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_KEEPALIVE)).not.toEqual([])
+        })
+    })
+
+    describe('when the player sends a keepalive', () => {
+
+        beforeEach(() => {
+            ThunkKeepAlive()(store.dispatch, store.getState, undefined)
+        })
+
+        it('then nothing happens', () => {
+            expect(store.getActions()).toEqual([])
         })
     })
 })
@@ -495,6 +513,129 @@ describe('given a game that the player has already joined', () => {
 
         it('then it removes the player\'s keepalive', () => {
             expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveKeepAlive('player1'))
+        })
+    })
+
+    describe('when the player sends a keepalive', () => {
+
+        beforeEach(() => {
+            ThunkKeepAlive()(store.dispatch, store.getState, undefined)
+        })
+
+        it('then the player\'s keepalive timer is updated', () => {
+            expect(store.getActions().filter((action: Action) => action.type == GAME_KEEPALIVE)).not.toEqual([])
+        })
+    })
+})
+
+describe('given a game with an active and an inactive player', () => {
+    let store: MockStore
+    const now = new Date
+
+    beforeEach(() => {
+        store = mockStore({
+            gameReducer: {
+                Players: new Set(['activePlayer', 'inactivePlayer'])
+                , KeepAlive: {
+                    'activePlayer': new Date(now.getTime() - 1000)
+                }
+                , Targets: {
+                    'activePlayer': 'inactivePlayer'
+                    , 'inactivePlayer': 'activePlayer'
+                }
+                , Accusations: {
+                    'activePlayer': 'inactivePlayer'
+                    , 'inactivePlayer': 'activePlayer'
+                }
+                , Sips: {
+                    'inactivePlayer': 3
+                }
+            }
+        })
+    })
+
+    describe('but the inactive player is inactive because its keepalive timer timed-out', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                ...store
+                , gameReducer: {
+                    ...store.getState().gameReducer
+                    , KeepAlive: {
+                        ...store.getState().gameReducer.KeepAlive
+                        , 'inactivePlayer': new Date(now.getTime() - KEEPALIVE_TIMEOUT_MS - 1)
+                    }
+                }
+            })
+        })
+
+        describe('when inactive players are kicked from the game', () => {
+
+            beforeEach(() => {
+                ThunkKickInactivePlayers(now)(store.dispatch, store.getState, undefined)
+            })
+
+            it('then it removes the inactive player from the players list', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemovePlayer('inactivePlayer'))
+            })
+
+            it('then it removes the pending target of the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('inactivePlayer'))
+            })
+
+            it('then it removes all targets targetting the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('activePlayer'))
+            })
+
+            it('then it removes the pending accusation of the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('inactivePlayer'))
+            })
+
+            it('then it removes all targets targetting the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('activePlayer'))
+            })
+
+            it('then it resets the inactive player\'s sips', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameResetSips('inactivePlayer'))
+            })
+
+            it('then it removes the inactive player\'s keepalive', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveKeepAlive('inactivePlayer'))
+            })
+        })
+    })
+
+    describe('but the inactive player is inactive because its keepalive timer does not exists', () => {
+
+        describe('when inactive players are kicked from the game', () => {
+
+            beforeEach(() => {
+                ThunkKickInactivePlayers(now)(store.dispatch, store.getState, undefined)
+            })
+
+            it('then it removes the inactive player from the players list', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemovePlayer('inactivePlayer'))
+            })
+
+            it('then it removes the pending target of the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('inactivePlayer'))
+            })
+
+            it('then it removes all targets targetting the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('activePlayer'))
+            })
+
+            it('then it removes the pending accusation of the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('inactivePlayer'))
+            })
+
+            it('then it removes all targets targetting the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('activePlayer'))
+            })
+
+            it('then it resets the inactive player\'s sips', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameResetSips('inactivePlayer'))
+            })
         })
     })
 })

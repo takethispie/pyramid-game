@@ -13,6 +13,8 @@ export interface GameState {
     , KeepAlive: { [id: string]: Date }
 }
 
+export const KEEPALIVE_TIMEOUT_MS = 10000
+
 function allSipsAreZero(game: GameState): boolean {
     return Object.keys(game.Sips).every(player => game.Sips[player] == 0)
 }

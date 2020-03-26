@@ -3,9 +3,10 @@ import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import { rootReducer, defaultRootState, Sync, MULTI_ACTION } from './root.reducer'
 import axios from 'axios'
-import { GameActionsTypes } from './gameReducer/game.actions'
-import { ThunkJoinGame, ThunkLeaveGame } from './gameReducer/game.thunk'
+import { GameActionsTypes, GameKeepAlive } from './gameReducer/game.actions'
+import { ThunkJoinGame, ThunkLeaveGame, ThunkKickInactivePlayers, ThunkKeepAlive } from './gameReducer/game.thunk'
 import { ChangeNickName } from './matchReducer/match.actions'
+import { KEEPALIVE_TIMEOUT_MS } from './gameReducer/game.state'
 
 const ws = new WebSocket('ws://localhost:3201');
 
@@ -83,5 +84,10 @@ store.dispatch(Sync())
 // const playerName = 'player' + Math.round(Math.random() * 10000)
 // store.dispatch(ChangeNickName(playerName))
 ThunkJoinGame()(store.dispatch, store.getState, undefined)
+
+setInterval(() => {
+  ThunkKeepAlive()(store.dispatch, store.getState, undefined)
+  ThunkKickInactivePlayers()(store.dispatch, store.getState, undefined)
+}, KEEPALIVE_TIMEOUT_MS / 2)
 
 export default store

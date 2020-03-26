@@ -102,7 +102,8 @@ const GameReducer = (state: GameState = defaultGameState, action: GameActionsTyp
             return {
                 ...state
                 , KeepAlive: {
-                    [action.payload.player]: action.payload.date
+                    ...state.KeepAlive
+                    , [action.payload.player]: new Date(action.payload.date)
                 }
             }
 
