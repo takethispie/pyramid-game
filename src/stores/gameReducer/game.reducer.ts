@@ -9,7 +9,8 @@ import {
     GAME_RESET_SIPS,
     GAME_ADD_PLAYER,
     GAME_REMOVE_PLAYER,
-    GAME_KEEPALIVE
+    GAME_KEEPALIVE,
+    GAME_REMOVE_KEEPALIVE
 } from './game.actions';
 
 export const defaultGameState: GameState = {
@@ -105,6 +106,14 @@ const GameReducer = (state: GameState = defaultGameState, action: GameActionsTyp
                     ...state.KeepAlive
                     , [action.payload.player]: new Date(action.payload.date)
                 }
+            }
+
+        case GAME_REMOVE_KEEPALIVE:
+            let newKeepAlive = { ...state.KeepAlive }
+            delete newKeepAlive[action.payload.player]
+            return {
+                ...state
+                , KeepAlive: newKeepAlive
             }
 
         default:

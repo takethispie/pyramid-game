@@ -8,7 +8,8 @@ import {
     GameResetSips,
     GameAddPlayer,
     GameRemovePlayer,
-    GameKeepAlive
+    GameKeepAlive,
+    GameRemoveKeepAlive
 } from './game.actions'
 import GameReducer, { defaultGameState } from './game.reducer'
 
@@ -315,6 +316,60 @@ describe('given a game with a player', () => {
                     , KeepAlive: {
                         'player': date
                     }
+                })
+            })
+        })
+    })
+})
+
+describe('given a game with a player', () => {
+    let state: GameState
+
+    beforeEach(() => {
+        state = {
+            ...defaultGameState
+            , Players: new Set(['player'])
+        }
+    })
+
+    describe('but the player does not have a keepalive timer', () => {
+
+        describe('when the game reducer receives a GAME_REMOVE_KEEPALIVE', () => {
+            let newState: GameState
+
+            beforeEach(() => {
+                newState = GameReducer(state, GameRemoveKeepAlive('player'))
+            })
+
+            it('then it does nothing', () => {
+                expect(newState).toEqual(state)
+            })
+        })
+    })
+
+    describe('but the player already has a keepalive timer', () => {
+        const date = new Date
+
+        beforeEach(() => {
+            state = {
+                ...state
+                , KeepAlive: {
+                    'player': new Date(date.getTime() - 1000)
+                }
+            }
+        })
+
+        describe('when the game reducer receives a GAME_REMOVE_KEEPALIVE', () => {
+            let newState: GameState
+
+            beforeEach(() => {
+                newState = GameReducer(state, GameRemoveKeepAlive('player'))
+            })
+
+            it('then it removes the keepalive timer of the player', () => {
+                expect(newState).toEqual({
+                    ...state
+                    , KeepAlive: {}
                 })
             })
         })
