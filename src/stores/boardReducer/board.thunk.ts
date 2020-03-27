@@ -17,5 +17,5 @@ export const ThunkGeneratePyramid = (): ThunkAction<void, BoardState, unknown, A
     const cards = RandomizeCards();
     dispatch(GeneratePyramid(cards));
     const result = CreatePyramid(cards);
-    dispatch(GeneratePyramidSuccess(result.pyramid));
+    dispatch(GeneratePyramidSuccess(result.pyramid, result.cardStack));
 }

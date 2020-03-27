@@ -37,7 +37,8 @@ interface GeneratePyramid {
 interface GeneratePyramidSuccess {
     type: typeof GENERATE_PYRAMID_SUCCESS;
     payload: {
-        pyramid: Card[]
+        pyramid: Card[],
+        cardStack: Card[]
     }
 }
 
@@ -85,11 +86,12 @@ export function GeneratePyramid(randomizedCards: string[]): BoardActionsTypes {
     }
 }
 
-export function GeneratePyramidSuccess(pyramid: Card[]): BoardActionsTypes {
+export function GeneratePyramidSuccess(pyramid: Card[], cardStack: Card[]): BoardActionsTypes {
     return {
         type: GENERATE_PYRAMID_SUCCESS,
         payload: {
-            pyramid
+            pyramid,
+            cardStack
         }
     }
 }

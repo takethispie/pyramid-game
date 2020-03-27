@@ -1,5 +1,7 @@
 import { HandState } from "./hand.state";
 import { HandActionsTypes } from "./hand.actions";
+import { Card } from "models/Card";
+import { CardName } from "models/CardName";
 
 export const defaultHandState: HandState = {
     IsLoading: false,

@@ -11,114 +11,120 @@ export const HIDE_HAND = "HIDE_HAND";
 export const CHOOSE_CARD = "CHOOSE_CARD";
 export const CHOOSE_CARD_SUCCESS = "CHOOSE_CARD_SUCCESS";
 
-
 interface LoadHand {
-    type: typeof LOAD_HAND;
-    payload: {
-        nickname: string,
-        gameId: string
-    }
+  type: typeof LOAD_HAND;
+  payload: {
+    nickname: string;
+    gameId: string;
+  };
 }
 
 interface LoadhandSuccess {
-    type: typeof LOAD_HAND_SUCCESS;
-    payload: {
-        cards: Card[]
-    }
+  type: typeof LOAD_HAND_SUCCESS;
+  payload: {
+    cards: Card[];
+  };
 }
 
 interface LoadhandError {
-    type: typeof LOAD_HAND_ERROR;
-    payload: {
-        errorMessage: string
-    }
+  type: typeof LOAD_HAND_ERROR;
+  payload: {
+    errorMessage: string;
+  };
 }
 
 interface ShowHandVisible {
-    type: typeof SHOW_HAND_VISIBLE;
+  type: typeof SHOW_HAND_VISIBLE;
 }
 
 interface ShowHandHidden {
-    type: typeof SHOW_HAND_HIDDEN;
+  type: typeof SHOW_HAND_HIDDEN;
 }
 
 interface HideHand {
-    type: typeof HIDE_HAND;
+  type: typeof HIDE_HAND;
 }
 
 interface ChooseCard {
-    type: typeof CHOOSE_CARD;
+  type: typeof CHOOSE_CARD;
 }
 
 interface ChooseCardSuccess {
-    type: typeof CHOOSE_CARD_SUCCESS;
-    payload: {
-        card: Card;
-        index: number;
-    }
+  type: typeof CHOOSE_CARD_SUCCESS;
+  payload: {
+    card: Card;
+    index: number;
+  };
 }
 
-export type HandActionsTypes = LoadHand | LoadhandSuccess | LoadhandError
-| ShowHandVisible | ShowHandHidden | HideHand | ChooseCard | ChooseCardSuccess;
+export type HandActionsTypes =
+  | LoadHand
+  | LoadhandSuccess
+  | LoadhandError
+  | ShowHandVisible
+  | ShowHandHidden
+  | HideHand
+  | ChooseCard
+  | ChooseCardSuccess;
 
 export function LoadHand(nickname: string, gameId: string): HandActionsTypes {
-    return {
-        type: LOAD_HAND,
-        payload: {
-            nickname,
-            gameId
-        }
+  return {
+    type: LOAD_HAND,
+    payload: {
+      nickname,
+      gameId
     }
+  };
 }
 
 export function LoadHandSuccess(cards: Card[]): HandActionsTypes {
-    return {
-        type: LOAD_HAND_SUCCESS,
-        payload: {
-            cards
-        }
+  return {
+    type: LOAD_HAND_SUCCESS,
+    payload: {
+      cards
     }
+  };
 }
 
 export function LoadHandError(errorMessage: string): HandActionsTypes {
-    return {
-        type: LOAD_HAND_ERROR,
-        payload: {
-            errorMessage
-        }
+  return {
+    type: LOAD_HAND_ERROR,
+    payload: {
+      errorMessage
     }
+  };
 }
 
 export function ShowHandVisible(): HandActionsTypes {
-    return {
-        type: SHOW_HAND_VISIBLE
-    }
+  return {
+    type: SHOW_HAND_VISIBLE
+  };
 }
 
 export function ShowHandHidden(): HandActionsTypes {
-    return {
-        type: SHOW_HAND_HIDDEN
-    }
+  return {
+    type: SHOW_HAND_HIDDEN
+  };
 }
 
 export function HideHand(): HandActionsTypes {
-    return {
-        type: HIDE_HAND
-    }
+  return {
+    type: HIDE_HAND
+  };
 }
 
 export function ChooseCard(): HandActionsTypes {
-    return {
-        type: CHOOSE_CARD
-    }
+  return {
+    type: CHOOSE_CARD
+  };
 }
 
 export function ChooseCardSuccess(card: Card, index: number): HandActionsTypes {
-    return {
-        type: CHOOSE_CARD_SUCCESS,
-        payload: {
-            card,
-            index
-        }
+  return {
+    type: CHOOSE_CARD_SUCCESS,
+    payload: {
+      card,
+      index
     }
+  };
 }

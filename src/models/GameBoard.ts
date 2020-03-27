@@ -50,5 +50,6 @@ export const CreatePyramid = (randomizedCard: string[]) => {
         pyramid.push(new Card(cards[pointer] as CardName, position.x, position.y, position.id));
         cards = cards.filter(c => c !== cards[pointer]);
     }
-    return {pyramid, cards};
+    let cardStack = cards.map(card => new Card(card as CardName, 0, 0, 0));
+    return {pyramid, cardStack};
 }

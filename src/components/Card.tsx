@@ -8,7 +8,8 @@ import { ThunkRevealNextCardSuccess } from 'stores/boardReducer/board.thunk';
 import { RevealCardSuccess } from 'stores/boardReducer/board.action';
 
 interface props {
-    card: Card
+    card: Card,
+    color?: "gray" | "blue";
 }
 
 
@@ -28,11 +29,11 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = PropsFromRedux & props;
 
 
-const CardComponent: React.FC<Props> = ({ card, visibleCards, revealCardSuccess }) => {
+const CardComponent: React.FC<Props> = ({ card, visibleCards, revealCardSuccess, color = "gray" }) => {
     if(visibleCards.some(id => id === card.Id && card.Visible == false)) revealCardSuccess(card);
 
     const [img] = useImage("/assets/cards/" + card.Name.toString() + ".png");
-    const [hiddenCardImg] = useImage("/assets/cards/gray_back.png");
+    const [hiddenCardImg] = useImage("/assets/cards/" + color + "_back.png");
     return card.Visible ? <Image width={110} height={180} x={card.X} y={card.Y} image={img} /> 
         : <Image width={110} height={180} x={card.X} y={card.Y} image={hiddenCardImg}></Image>
 };

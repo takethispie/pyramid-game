@@ -15,15 +15,16 @@ import {
 } from "@ionic/react";
 import React from "react";
 import { Stage, Layer } from "react-konva";
-import CardComponent from "components/Card";
+import Card from "components/Card";
 import { RootState } from "stores/root.reducer";
 import { connect, ConnectedProps, Provider } from "react-redux";
 import { ThunkRevealNextCard, ThunkGeneratePyramid } from "stores/boardReducer/board.thunk";
 import store from "stores";
+import Hand from "components/Hand";
 
 const mapState = (state: RootState) => ({
   pyramid: state.boardReducer.Pyramid,
-  boardError: state.boardReducer.ErrorMessage
+  boardError: state.boardReducer.ErrorMessage,
 });
 
 const mapDispatch = {
@@ -65,8 +66,9 @@ const Board: React.FC<Props> = ({ revealCard, pyramid, boardError }) => {
               <Provider store={store}>
                 <Layer>
                   {pyramid.map(card => (
-                    <CardComponent key={card.Id} card={card}></CardComponent>
+                    <Card key={card.Id} card={card}></Card>
                   ))}
+                  <Hand></Hand>
                 </Layer>
               </Provider>
             </Stage>

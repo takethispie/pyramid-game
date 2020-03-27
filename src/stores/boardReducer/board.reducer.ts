@@ -8,6 +8,7 @@ export const defaultBoardState: BoardState = {
     LastId: -1,
     IsPyramidLoaded: false,
     ErrorMessage: "",
+    CardStack: []
 };
 
 const BoardReducer = (state: BoardState = defaultBoardState, action: BoardActionsTypes): BoardState => {
@@ -22,7 +23,7 @@ const BoardReducer = (state: BoardState = defaultBoardState, action: BoardAction
             return {...state, ErrorMessage: "", VisibleCardIds: [], RemainingCards: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], LastId: -1, IsPyramidLoaded: false};
 
         case GENERATE_PYRAMID_SUCCESS:
-            return {...state, Pyramid: action.payload.pyramid, IsPyramidLoaded: true}
+            return {...state, Pyramid: action.payload.pyramid, IsPyramidLoaded: true, CardStack: action.payload.cardStack}
 
         case GENERATE_PYRAMID_ERROR:
             return {...state, ErrorMessage: action.payload.errorMessage};
