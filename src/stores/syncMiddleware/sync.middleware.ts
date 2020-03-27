@@ -2,12 +2,15 @@ import { Middleware, Action } from "redux";
 import { SYNC, Sync } from "./sync.action";
 import { Dispatch } from "react";
 
-function createSyncMiddleware(address: string, getDispatch: () => Dispatch<Action>): Middleware {
+function createSyncMiddleware(address: string, getDispatch: () => Dispatch<Action>, filter: undefined | ((action: Action) => boolean) = undefined): Middleware {
 
     const ws = new WebSocket(address);
 
     ws.onmessage = function (event) {
-        getDispatch()(Sync(JSON.parse(event.data)))
+        const action = JSON.parse(event.data)
+        if (filter != undefined && filter(action)) {
+            getDispatch()(Sync(action))
+        }
     }
 
     return () => next => action => {
@@ -20,7 +23,9 @@ function createSyncMiddleware(address: string, getDispatch: () => Dispatch<Actio
         if (action.type === SYNC) {
             next(action.payload.action)
         } else {
-            send(action)
+            if (filter != undefined && filter(action)) {
+                send(action)
+            }
             next(action)
         }
     }
