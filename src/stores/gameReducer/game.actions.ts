@@ -1,4 +1,44 @@
-import { GameStep } from "./game.state"
+// ----- GAME_ADD_PLAYER -----
+
+export const GAME_ADD_PLAYER = "GAME_ADD_PLAYER"
+interface GameAddPlayerAction {
+    type: typeof GAME_ADD_PLAYER,
+    payload: {
+        player: string
+    }
+}
+
+export function GameAddPlayer(
+    player: string
+): GameAddPlayerAction {
+    return {
+        type: GAME_ADD_PLAYER,
+        payload: {
+            player
+        }
+    }
+}
+
+// ----- GAME_REMOVE_PLAYER -----
+
+export const GAME_REMOVE_PLAYER = "GAME_REMOVE_PLAYER"
+interface GameRemovePlayerAction {
+    type: typeof GAME_REMOVE_PLAYER,
+    payload: {
+        player: string
+    }
+}
+
+export function GameRemovePlayer(
+    player: string
+): GameRemovePlayerAction {
+    return {
+        type: GAME_REMOVE_PLAYER,
+        payload: {
+            player
+        }
+    }
+}
 
 // ----- GAME_ADD_TARGET -----
 
@@ -45,27 +85,6 @@ export function GameRemoveTarget(
     }
 }
 
-// ----- GAME_SET_STEP -----
-
-export const GAME_SET_STEP = "GAME_SET_STEP"
-interface GameSetStepAction {
-    type: typeof GAME_SET_STEP,
-    payload: {
-        step: GameStep
-    }
-}
-
-export function GameSetStep(
-    step: GameStep
-): GameSetStepAction {
-    return {
-        type: GAME_SET_STEP,
-        payload: {
-            step
-        }
-    }
-}
-
 // ----- GAME_ADD_ACCUSATION -----
 
 export const GAME_ADD_ACCUSATION = "GAME_ADD_ACCUSATION"
@@ -77,7 +96,7 @@ interface GameAddAccusationAction {
     }
 }
 
-export function GameAddAccusation(playerWhoAccuses: string, accusedPlayer: string): GameAddAccusationAction {
+export function GameAddAccusation(accusedPlayer: string, playerWhoAccuses: string): GameAddAccusationAction {
     return {
         type: GAME_ADD_ACCUSATION,
         payload: {
@@ -93,15 +112,15 @@ export const GAME_REMOVE_ACCUSATION = "GAME_REMOVE_ACCUSATION"
 interface GameRemoveAccusationAction {
     type: typeof GAME_REMOVE_ACCUSATION,
     payload: {
-        playerWhoAccuses: string
+        accusedPlayer: string
     }
 }
 
-export function GameRemoveAccusation(playerWhoAccuses: string): GameRemoveAccusationAction {
+export function GameRemoveAccusation(accusedPlayer: string): GameRemoveAccusationAction {
     return {
         type: GAME_REMOVE_ACCUSATION,
         payload: {
-            playerWhoAccuses
+            accusedPlayer
         }
     }
 }
@@ -127,48 +146,75 @@ export function GameAddSips(player: string, numberOfSips: number): GameAddSipsAc
     }
 }
 
-// ----- GAME_ADD_DONE_DRINKING -----
+// ----- GAME_RESET_SIPS -----
 
-export const GAME_ADD_DONE_DRINKING = "GAME_ADD_DONE_DRINKING"
-interface GameAddDoneDrinkingAction {
-    type: typeof GAME_ADD_DONE_DRINKING,
+export const GAME_RESET_SIPS = "GAME_RESET_SIPS"
+interface GameResetSipsAction {
+    type: typeof GAME_RESET_SIPS,
     payload: {
         player: string
     }
 }
 
-export function GameAddDoneDrinking(player: string): GameAddDoneDrinkingAction {
+export function GameResetSips(player: string): GameResetSipsAction {
     return {
-        type: GAME_ADD_DONE_DRINKING,
+        type: GAME_RESET_SIPS,
         payload: {
             player
         }
     }
 }
 
-// ----- GAME_RESET_DONE_DRINKING -----
+// ----- GAME_KEEPALIVE -----
 
-export const GAME_RESET_DONE_DRINKING = "GAME_RESET_DONE_DRINKING"
-interface GameResetDoneDrinkingAction {
-    type: typeof GAME_RESET_DONE_DRINKING,
-    payload: {}
+export const GAME_KEEPALIVE = "GAME_KEEPALIVE"
+interface GameKeepAliveAction {
+    type: typeof GAME_KEEPALIVE,
+    payload: {
+        player: string,
+        date: Date
+    }
 }
 
-export function GameResetDoneDrinking(): GameResetDoneDrinkingAction {
+export function GameKeepAlive(player: string, date: Date): GameKeepAliveAction {
     return {
-        type: GAME_RESET_DONE_DRINKING,
-        payload: {}
+        type: GAME_KEEPALIVE,
+        payload: {
+            player,
+            date
+        }
+    }
+}
+
+// ----- GAME_REMOVE_KEEPALIVE -----
+
+export const GAME_REMOVE_KEEPALIVE = "GAME_REMOVE_KEEPALIVE"
+interface GameRemoveKeepAliveAction {
+    type: typeof GAME_REMOVE_KEEPALIVE,
+    payload: {
+        player: string
+    }
+}
+
+export function GameRemoveKeepAlive(player: string): GameRemoveKeepAliveAction {
+    return {
+        type: GAME_REMOVE_KEEPALIVE,
+        payload: {
+            player
+        }
     }
 }
 
 // -----
 
 export type GameActionsTypes
-    = GameAddTargetAction
+    = GameAddPlayerAction
+    | GameRemovePlayerAction
+    | GameAddTargetAction
     | GameRemoveTargetAction
-    | GameSetStepAction
     | GameAddAccusationAction
     | GameRemoveAccusationAction
     | GameAddSipsAction
-    | GameAddDoneDrinkingAction
-    | GameResetDoneDrinkingAction
+    | GameResetSipsAction
+    | GameKeepAliveAction
+    | GameRemoveKeepAliveAction

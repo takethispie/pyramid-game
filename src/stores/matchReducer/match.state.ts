@@ -5,5 +5,5 @@ export interface MatchState {
     MatchId: string,
     ErrorMessage: string,
     NickName: string,
-    Game: GameState
+    Game: GameState // TODO: remove
 }

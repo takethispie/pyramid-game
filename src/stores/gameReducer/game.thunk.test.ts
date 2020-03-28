@@ -1,25 +1,34 @@
-import { GameStep } from './game.state'
+import { GameStep, KEEPALIVE_TIMEOUT_MS } from './game.state'
 import {
     ThunkChooseTarget,
     ThunkAccuse,
     ThunkAcceptToDrink,
     ThunkDrink,
     ThunkAdmitToLying,
-    ThunkProveNotLying as ThunkProveNotToLie
+    ThunkProveNotToLie,
+    ThunkJoinGame,
+    ThunkLeaveGame,
+    ThunkKickInactivePlayers,
+    ThunkKeepAlive
 } from './game.thunk'
 import configureMockStore, { MockStore } from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import {
     GameAddTarget,
     GameRemoveTarget,
-    GameSetStep,
     GameAddAccusation,
     GameAddSips,
-    GAME_SET_STEP,
-    GameAddDoneDrinking,
-    GameResetDoneDrinking,
-    GameRemoveAccusation
+    GameRemoveAccusation,
+    GameResetSips,
+    GAME_ADD_PLAYER,
+    GAME_REMOVE_PLAYER,
+    GAME_KEEPALIVE,
+    GameRemoveKeepAlive,
+    GameRemovePlayer,
+    GameKeepAlive
 } from './game.actions'
+import { defaultRootState } from 'stores/root.reducer'
+import { Action } from 'redux'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
@@ -31,46 +40,34 @@ describe('given a game in the target choosing step', () => {
 
     beforeEach(() => {
         store = mockStore({
-            CurrentStep: GameStep.ChooseTarget
-            , Players: new Set(['player1', 'player2', 'player3'])
+            gameReducer: {
+                Players: new Set(['player1', 'player2', 'player3'])
+            }
         })
     })
 
-    describe('when a player chooses its target (not the last one)', () => {
+    describe('but there is more than one player that did not choose its target', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Targets: {}
-            })
-            ThunkChooseTarget('player1', 'player2')(store.dispatch, store.getState, null)
-        })
-
-        it('then the target is added to the target list', () => {
-            expect(store.getActions()).toContainEqual(GameAddTarget('player1', 'player2'))
-        })
-
-        it('then the game remains in the target choosing step', () => {
-            expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
-        })
-    })
-
-    describe('when the last player chooses its target', () => {
-
-        beforeEach(() => {
-            store = mockStore({
-                ...store.getState()
-                , Targets: {
-                    'player2': 'player3',
-                    'player3': 'player2',
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {}
                 }
             })
-            ThunkChooseTarget('player1', 'player2')(store.dispatch, store.getState, null)
         })
 
-        it('then the game moves to the accuse step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Accuse))
+        describe('when a player chooses its target', () => {
+
+            beforeEach(() => {
+                ThunkChooseTarget('player1', 'player2')(store.dispatch, store.getState, null)
+            })
+
+            it('then the target is added to the target list', () => {
+                expect(store.getActions()).toContainEqual(GameAddTarget('player1', 'player2'))
+            })
         })
+
     })
 })
 
@@ -80,124 +77,77 @@ describe('given a game in the accuse step', () => {
 
     beforeEach(() => {
         store = mockStore({
-            CurrentStep: GameStep.ChooseTarget
-            , Players: new Set(['player1', 'player2', 'player3'])
-            , Targets: {
-                'player1': 'player2',
-                'player2': 'player3',
-                'player3': 'player2'
+            gameReducer: {
+                Players: new Set(['player1', 'player2', 'player3'])
             }
         })
     })
 
-    describe('when a player accuses another player of lying', () => {
-
-        beforeEach(() => {
-            ThunkAccuse('player2', 'player1')(store.dispatch, store.getState, null)
-        })
-
-        it('then the accusation is added to the accusation list', () => {
-            expect(store.getActions()).toContainEqual(GameAddAccusation('player2', 'player1'))
-        })
-
-        it('then the target is removed from the target list', () => {
-            expect(store.getActions()).toContainEqual(GameRemoveTarget('player1'))
-        })
-    })
-
-    describe('when a player acusses another player of lying, but the other player did not target the accuser', () => {
-
-        beforeEach(() => {
-            ThunkAccuse('player1', 'player2')(store.dispatch, store.getState, null)
-        })
-
-        it('then nothing happens', () => {
-            expect(store.getActions()).toEqual([])
-        })
-    })
-
-    describe('when a targeted player chooses to drink', () => {
-
-        beforeEach(() => {
-            ThunkAcceptToDrink('player2', 'player1')(store.dispatch, store.getState, null)
-        })
-
-        it('the number of sips of the player is incremented', () => {
-            expect(store.getActions()).toContainEqual(GameAddSips('player2', 1))
-        })
-
-        it('then the target is removed from the target list', () => {
-            expect(store.getActions()).toContainEqual(GameRemoveTarget('player1'))
-        })
-    })
-
-    describe('when a player chooses to drink, but the other player did not target the player', () => {
-
-        beforeEach(() => {
-            ThunkAcceptToDrink('player1', 'player2')(store.dispatch, store.getState, null)
-        })
-
-        it('then nothing happens', () => {
-            expect(store.getActions()).toEqual([])
-        })
-    })
-
-    describe('when the last player accuses another player of lying', () => {
+    describe('but there is more than one player that is still targeted', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Targets: {
-                    'player2': 'player3'
-                }
-                , Accusations: {
-                    'player2': 'player1',
-                    'player3': 'player2'
-                }
-            })
-            ThunkAccuse('player3', 'player2')(store.dispatch, store.getState, null)
-        })
-
-        it('then the game moves to the denying step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Deny))
-        })
-    })
-
-    describe('when all players choose to drink', () => {
-
-        beforeEach(() => {
-            store = mockStore({
-                ...store.getState()
-                , Targets: {
-                    'player2': 'player3'
-                }
-                , Accusations: {}
-            })
-            ThunkAcceptToDrink('player3', 'player2')(store.dispatch, store.getState, null)
-        })
-
-        it('then the game moves to the drinking step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Drink))
-        })
-    })
-
-    describe('when the last player chooses to drink but another player accused someone', () => {
-
-        beforeEach(() => {
-            store = mockStore({
-                ...store.getState()
-                , Targets: {
-                    'player3': 'player2'
-                }
-                , Accusations: {
-                    'player3': 'player2'
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Targets: {
+                        'player1': 'player2',
+                        'player2': 'player3',
+                        'player3': 'player2'
+                    }
                 }
             })
-            ThunkAcceptToDrink('player2', 'player3')(store.dispatch, store.getState, null)
         })
 
-        it('then the game moves to the denying step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Deny))
+        describe('when a player accuses another player of lying', () => {
+
+            beforeEach(() => {
+                ThunkAccuse('player1', 'player2')(store.dispatch, store.getState, null)
+            })
+
+            it('then the accusation is added to the accusation list', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddAccusation('player1', 'player2'))
+            })
+
+            it('then the target is removed from the target list', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player1'))
+            })
+        })
+
+        describe('when a player acusses another player of lying, but the other player did not target the accuser', () => {
+
+            beforeEach(() => {
+                ThunkAccuse('player2', 'player1')(store.dispatch, store.getState, null)
+            })
+
+            it('then nothing happens', () => {
+                expect(store.getActions()).toEqual([])
+            })
+        })
+
+        describe('when a targeted player chooses to drink', () => {
+
+            beforeEach(() => {
+                ThunkAcceptToDrink('player1', 'player2')(store.dispatch, store.getState, null)
+            })
+
+            it('the number of sips of the player is incremented', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('player2', 1))
+            })
+
+            it('then the target is removed from the target list', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player1'))
+            })
+        })
+
+        describe('when a player chooses to drink, but the other player did not target the player', () => {
+
+            beforeEach(() => {
+                ThunkAcceptToDrink('player2', 'player1')(store.dispatch, store.getState, null)
+            })
+
+            it('then nothing happens', () => {
+                expect(store.getActions()).toEqual([])
+            })
         })
     })
 })
@@ -208,15 +158,16 @@ describe('given a game in the deny step', () => {
 
     beforeEach(() => {
         store = mockStore({
-            CurrentStep: GameStep.Deny
-            , Players: new Set([
-                'accuser1'
-                , 'accused1'
-                , 'accuser2'
-                , 'accused2'
-                , 'non-accused'
-                , 'non-accuser'
-            ])
+            gameReducer: {
+                Players: new Set([
+                    'accuser1'
+                    , 'accused1'
+                    , 'accuser2'
+                    , 'accused2'
+                    , 'non-accused'
+                    , 'non-accuser'
+                ])
+            }
         })
     })
 
@@ -224,10 +175,12 @@ describe('given a game in the deny step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Accusations: {
-                    'accuser1': 'accused1',
-                    'accuser2': 'accused2',
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Accusations: {
+                        'accused1': 'accuser1',
+                        'accused2': 'accuser2',
+                    }
                 }
             })
         })
@@ -239,15 +192,11 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accuser receives twice the sips', () => {
-                expect(store.getActions()).toContainEqual(GameAddSips('accuser1', 2))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('accuser1', 2))
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
-            })
-
-            it('then the game remains in the deny step', () => {
-                expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('accused1'))
             })
         })
 
@@ -258,15 +207,11 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accused player receives twice the sips', () => {
-                expect(store.getActions()).toContainEqual(GameAddSips('accused1', 2))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('accused1', 2))
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
-            })
-
-            it('then the game remains in the deny step', () => {
-                expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('accused1'))
             })
         })
 
@@ -297,9 +242,11 @@ describe('given a game in the deny step', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , Accusations: {
-                    'accuser1': 'accused1'
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Accusations: {
+                        'accused1': 'accuser1'
+                    }
                 }
             })
         })
@@ -311,15 +258,11 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accuser receives twice the sips', () => {
-                expect(store.getActions()).toContainEqual(GameAddSips('accuser1', 2))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('accuser1', 2))
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
-            })
-
-            it('then the game moves to the drinking step', () => {
-                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Drink))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('accused1'))
             })
         })
 
@@ -330,15 +273,11 @@ describe('given a game in the deny step', () => {
             })
 
             it('then the accused player receives twice the sips', () => {
-                expect(store.getActions()).toContainEqual(GameAddSips('accused1', 2))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameAddSips('accused1', 2))
             })
 
             it('then the accusation is removed from the list of accusations', () => {
-                expect(store.getActions()).toContainEqual(GameRemoveAccusation('accuser1'))
-            })
-
-            it('then the game moves to the drinking step', () => {
-                expect(store.getActions()).toContainEqual(GameSetStep(GameStep.Drink))
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('accused1'))
             })
         })
 
@@ -372,43 +311,331 @@ describe('given a game in the drinking step', () => {
 
     beforeEach(() => {
         store = mockStore({
-            CurrentStep: GameStep.Drink
-            , Players: new Set(['player1', 'player2', 'player3'])
-            , DoneDrinking: new Set
+            gameReducer: {
+                Players: new Set(['player1', 'player2', 'player3'])
+            }
         })
     })
 
-    describe('when a player drinks (not the last one)', () => {
-
-        beforeEach(() => {
-            ThunkDrink('player1')(store.dispatch, store.getState, null)
-        })
-
-        it('then the game remains in the drinking step', () => {
-            expect(store.getActions().filter(action => action.type == GAME_SET_STEP)).toEqual([])
-        })
-
-        it('the player who drank is added the to list of player done drinking', () => {
-            expect(store.getActions()).toContainEqual(GameAddDoneDrinking('player1'))
-        })
-    })
-
-    describe('when the last player drinks', () => {
+    describe('but there is more than one player who has not yet drunk', () => {
 
         beforeEach(() => {
             store = mockStore({
-                ...store.getState()
-                , DoneDrinking: new Set(['player2', 'player3'])
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Sips: {
+                        'player1': 1
+                        , 'player2': 1
+                        , 'player3': 1
+                    }
+                }
             })
-            ThunkDrink('player1')(store.dispatch, store.getState, null)
         })
 
-        it('the game moves to the target choosing step', () => {
-            expect(store.getActions()).toContainEqual(GameSetStep(GameStep.ChooseTarget))
+        describe('when a player drinks', () => {
+
+            beforeEach(() => {
+                ThunkDrink('player1')(store.dispatch, store.getState, null)
+            })
+
+            it('the sips number of the player is reset', () => {
+                expect(store.getActions()).toContainEqual(GameResetSips('player1'))
+            })
+        })
+    })
+
+    describe('but there is only one player who has not yet drunk', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Sips: {
+                        'player1': 1
+                        , 'player2': 0
+                        , 'player3': 0
+                    }
+                }
+            })
         })
 
-        it('the list of player done drinking is reseted', () => {
-            expect(store.getActions()).toContainEqual(GameResetDoneDrinking())
+        describe('when the last player drinks', () => {
+
+            beforeEach(() => {
+                ThunkDrink('player1')(store.dispatch, store.getState, null)
+            })
+
+            it('the sips number of the player is reset', () => {
+                expect(store.getActions()).toContainEqual(GameResetSips('player1'))
+            })
+        })
+    })
+
+    describe('but there is only one player who has not yet drunk, but some sips are undefined', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                gameReducer: {
+                    ...store.getState().gameReducer
+                    , Sips: {
+                        'player1': 1
+                    }
+                }
+            })
+        })
+
+        describe('when the last player drinks', () => {
+
+            beforeEach(() => {
+                ThunkDrink('player1')(store.dispatch, store.getState, null)
+            })
+
+            it('the sips number of the player is reset', () => {
+                expect(store.getActions()).toContainEqual(GameResetSips('player1'))
+            })
+        })
+    })
+})
+
+describe('given a game that the player did not join yet', () => {
+    let store: MockStore
+
+    beforeEach(() => {
+        store = mockStore({
+            matchReducer: {
+                NickName: "playerName"
+            }
+            , gameReducer: {
+                Players: new Set(['anotherPlayer'])
+            }
+        })
+    })
+
+    describe('when the player joins the game', () => {
+        beforeEach(() => {
+            ThunkJoinGame()(store.dispatch, store.getState, undefined)
+        })
+
+        it('then the player is added to the players list', () => {
+            expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_ADD_PLAYER)).not.toEqual([])
+        })
+
+        it('then player\'s nickname is used', () => {
+            expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_ADD_PLAYER)[0].payload.player).toEqual('playerName')
+        })
+
+        it('then the player\'s keepalive timer is updated', () => {
+            expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_KEEPALIVE)).not.toEqual([])
+        })
+    })
+
+    describe('when the player sends a keepalive', () => {
+
+        beforeEach(() => {
+            ThunkKeepAlive()(store.dispatch, store.getState, undefined)
+        })
+
+        it('then nothing happens', () => {
+            expect(store.getActions()).toEqual([])
+        })
+    })
+})
+
+describe('given a game that the player has already joined', () => {
+    let store: MockStore
+    const now = new Date
+
+    beforeEach(() => {
+        store = mockStore({
+            ...defaultRootState
+            , matchReducer: {
+                ...defaultRootState.matchReducer
+                , NickName: "player1"
+            }
+            , gameReducer: {
+                ...defaultRootState.gameReducer
+                , Players: new Set(['player1', 'player2', 'player3'])
+                , Targets: {
+                    'player1': 'player2'
+                    , 'player2': 'player1'
+                    , 'player3': 'player1'
+                }
+                , Accusations: {
+                    'player1': 'player2'
+                    , 'player2': 'player1'
+                    , 'player3': 'player1'
+                }
+                , Sips: {
+                    'player1': 1
+                }
+                , KeepAlive: {
+                    'player1': now
+                }
+            }
+        })
+    })
+
+    describe('when the player leaves the game', () => {
+
+        beforeEach(() => {
+            ThunkLeaveGame()(store.dispatch, store.getState, undefined)
+        })
+
+        it('then it removes the player from the players list', () => {
+            expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_REMOVE_PLAYER)).not.toEqual([])
+        })
+
+        it('then it uses the player nickname', () => {
+            expect(store.getActions()[0].payload.actions.filter((action: Action) => action.type == GAME_REMOVE_PLAYER)[0].payload.player).toEqual('player1')
+        })
+
+        it('then it removes the pending target', () => {
+            expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player1'))
+        })
+
+        it('then it removes all targets targetting the leaving player', () => {
+            expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player2'))
+            expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('player3'))
+        })
+
+        it('then it removes the pending accusation', () => {
+            expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('player1'))
+        })
+
+        it('then it removes all targets targetting the leaving player', () => {
+            expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('player2'))
+            expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('player3'))
+        })
+
+        it('then it resets the player\'s sips', () => {
+            expect(store.getActions()[0].payload.actions).toContainEqual(GameResetSips('player1'))
+        })
+
+        it('then it removes the player\'s keepalive', () => {
+            expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveKeepAlive('player1'))
+        })
+    })
+
+    describe('when the player sends a keepalive', () => {
+
+        beforeEach(() => {
+            ThunkKeepAlive()(store.dispatch, store.getState, undefined)
+        })
+
+        it('then the player\'s keepalive timer is updated', () => {
+            expect(store.getActions().filter((action: Action) => action.type == GAME_KEEPALIVE)).not.toEqual([])
+        })
+    })
+})
+
+describe('given a game with an active and an inactive player', () => {
+    let store: MockStore
+    const now = new Date
+
+    beforeEach(() => {
+        store = mockStore({
+            gameReducer: {
+                Players: new Set(['activePlayer', 'inactivePlayer'])
+                , KeepAlive: {
+                    'activePlayer': new Date(now.getTime() - 1000)
+                }
+                , Targets: {
+                    'activePlayer': 'inactivePlayer'
+                    , 'inactivePlayer': 'activePlayer'
+                }
+                , Accusations: {
+                    'activePlayer': 'inactivePlayer'
+                    , 'inactivePlayer': 'activePlayer'
+                }
+                , Sips: {
+                    'inactivePlayer': 3
+                }
+            }
+        })
+    })
+
+    describe('but the inactive player is inactive because its keepalive timer timed-out', () => {
+
+        beforeEach(() => {
+            store = mockStore({
+                ...store
+                , gameReducer: {
+                    ...store.getState().gameReducer
+                    , KeepAlive: {
+                        ...store.getState().gameReducer.KeepAlive
+                        , 'inactivePlayer': new Date(now.getTime() - KEEPALIVE_TIMEOUT_MS - 1)
+                    }
+                }
+            })
+        })
+
+        describe('when inactive players are kicked from the game', () => {
+
+            beforeEach(() => {
+                ThunkKickInactivePlayers(now)(store.dispatch, store.getState, undefined)
+            })
+
+            it('then it removes the inactive player from the players list', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemovePlayer('inactivePlayer'))
+            })
+
+            it('then it removes the pending target of the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('inactivePlayer'))
+            })
+
+            it('then it removes all targets targetting the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('activePlayer'))
+            })
+
+            it('then it removes the pending accusation of the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('inactivePlayer'))
+            })
+
+            it('then it removes all targets targetting the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('activePlayer'))
+            })
+
+            it('then it resets the inactive player\'s sips', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameResetSips('inactivePlayer'))
+            })
+
+            it('then it removes the inactive player\'s keepalive', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveKeepAlive('inactivePlayer'))
+            })
+        })
+    })
+
+    describe('but the inactive player is inactive because its keepalive timer does not exists', () => {
+
+        describe('when inactive players are kicked from the game', () => {
+
+            beforeEach(() => {
+                ThunkKickInactivePlayers(now)(store.dispatch, store.getState, undefined)
+            })
+
+            it('then it removes the inactive player from the players list', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemovePlayer('inactivePlayer'))
+            })
+
+            it('then it removes the pending target of the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('inactivePlayer'))
+            })
+
+            it('then it removes all targets targetting the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveTarget('activePlayer'))
+            })
+
+            it('then it removes the pending accusation of the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('inactivePlayer'))
+            })
+
+            it('then it removes all targets targetting the inactive player', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameRemoveAccusation('activePlayer'))
+            })
+
+            it('then it resets the inactive player\'s sips', () => {
+                expect(store.getActions()[0].payload.actions).toContainEqual(GameResetSips('inactivePlayer'))
+            })
         })
     })
 })

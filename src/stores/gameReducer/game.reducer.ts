@@ -3,25 +3,41 @@ import {
     GameActionsTypes,
     GAME_ADD_TARGET,
     GAME_REMOVE_TARGET,
-    GAME_SET_STEP,
     GAME_ADD_ACCUSATION,
     GAME_REMOVE_ACCUSATION,
     GAME_ADD_SIPS,
-    GAME_ADD_DONE_DRINKING,
-    GAME_RESET_DONE_DRINKING
+    GAME_RESET_SIPS,
+    GAME_ADD_PLAYER,
+    GAME_REMOVE_PLAYER,
+    GAME_KEEPALIVE,
+    GAME_REMOVE_KEEPALIVE
 } from './game.actions';
 
 export const defaultGameState: GameState = {
-    CurrentStep: GameStep.ChooseTarget,
-    Players: new Set,
-    Targets: {},
-    Accusations: {},
-    Sips: {},
-    DoneDrinking: new Set
+    Players: new Set
+    , Targets: {}
+    , Accusations: {}
+    , Sips: {}
+    , KeepAlive: {}
 };
 
 const GameReducer = (state: GameState = defaultGameState, action: GameActionsTypes): GameState => {
     switch (action.type) {
+
+        case GAME_ADD_PLAYER:
+            return {
+                ...state
+                , Players: new Set([
+                    ...state.Players
+                    , action.payload.player
+                ])
+            }
+
+        case GAME_REMOVE_PLAYER:
+            return {
+                ...state
+                , Players: new Set([...state.Players].filter(player => player != action.payload.player))
+            }
 
         case GAME_ADD_TARGET:
             return {
@@ -40,53 +56,64 @@ const GameReducer = (state: GameState = defaultGameState, action: GameActionsTyp
                 , Targets: newTargets
             }
 
-        case GAME_SET_STEP:
-            return {
-                ...state
-                , CurrentStep: action.payload.step
-            }
-
         case GAME_ADD_ACCUSATION:
             return {
                 ...state
                 , Accusations: {
                     ...state.Accusations
-                    , [action.payload.playerWhoAccuses]: action.payload.accusedPlayer
+                    , [action.payload.accusedPlayer]: action.payload.playerWhoAccuses
                 }
             }
 
         case GAME_REMOVE_ACCUSATION:
             let newAccusations = { ...state.Accusations }
-            delete newAccusations[action.payload.playerWhoAccuses]
+            delete newAccusations[action.payload.accusedPlayer]
             return {
                 ...state
                 , Accusations: newAccusations
             }
 
         case GAME_ADD_SIPS:
-            let newSips = { ...state.Sips }
-            if (!(action.payload.player in newSips)) {
+            {
+                let newSips = { ...state.Sips }
+                if (!(action.payload.player in newSips)) {
+                    newSips[action.payload.player] = 0
+                }
+                newSips[action.payload.player] += action.payload.numberOfSips
+                return {
+                    ...state
+                    , Sips: newSips
+                }
+            }
+
+        case GAME_RESET_SIPS:
+            {
+                let newSips = { ...state.Sips }
+                if (!(action.payload.player in newSips)) {
+                    newSips[action.payload.player] = 0
+                }
                 newSips[action.payload.player] = 0
-            }
-            newSips[action.payload.player] += action.payload.numberOfSips
-            return {
-                ...state
-                , Sips: newSips
-            }
-
-        case GAME_ADD_DONE_DRINKING:
-            return {
-                ...state
-                , DoneDrinking: new Set([
-                    ...state.DoneDrinking
-                    , action.payload.player
-                ])
+                return {
+                    ...state
+                    , Sips: newSips
+                }
             }
 
-        case GAME_RESET_DONE_DRINKING:
+        case GAME_KEEPALIVE:
             return {
                 ...state
-                , DoneDrinking: new Set
+                , KeepAlive: {
+                    ...state.KeepAlive
+                    , [action.payload.player]: new Date(action.payload.date)
+                }
+            }
+
+        case GAME_REMOVE_KEEPALIVE:
+            let newKeepAlive = { ...state.KeepAlive }
+            delete newKeepAlive[action.payload.player]
+            return {
+                ...state
+                , KeepAlive: newKeepAlive
             }
 
         default:
