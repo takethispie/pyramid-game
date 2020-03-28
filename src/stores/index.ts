@@ -33,7 +33,7 @@ const store = createStore(
   composeWithDevTools(applyMiddleware(
     thunk
     , createSyncMiddleware(
-      'ws://localhost:3200',
+      'ws://' + currentUrl.hostname + ':3200',
       getDispatch,
       storeId,
       action =>
