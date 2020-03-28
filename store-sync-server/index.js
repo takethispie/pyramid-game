@@ -1,30 +1,40 @@
 const port = 3200
 const WebSocket = require('ws')
 
-const history = []
+const history = {}
 
 const wss = new WebSocket.Server({ port: port })
+
 console.log('Listening on ' + port)
 
 wss.on('connection', ws => {
-    console.log('Client connected (' + [...wss.clients].length + ' clients connected)')
 
     ws.on('close', () => {
-        console.log('Client disconnected (' + [...wss.clients].length + ' clients connected)')
+        console.log('Client disconnected')
     })
 
-    for (const data of history) {
-        ws.send(data)
-    }
-
     ws.on('message', function incoming(data) {
-        history.push(data)
         console.log('Received: ' + data)
-        wss.clients.forEach(function each(client) {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
-                client.send(data);
-            }
-        });
+        const message = JSON.parse(data)
+        switch (message.type) {
+            case 'CONNECT':
+                console.log('Client connected on ' + message.payload.storeId)
+                ws.storeId = message.payload.storeId
+                if (history[message.payload.storeId] == undefined) {
+                    history[message.payload.storeId] = []
+                }
+                for (const data of history[message.payload.storeId]) {
+                    ws.send(JSON.stringify(data))
+                }
+                break
+            case 'BROADCAST':
+                history[message.payload.storeId].push(message.payload.action)
+                wss.clients.forEach(client => {
+                    if (client !== ws && client.readyState === WebSocket.OPEN && client.storeId == message.payload.storeId) {
+                        client.send(JSON.stringify(message.payload.action));
+                    }
+                });
+                break
+        }
     });
 })
-

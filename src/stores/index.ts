@@ -20,6 +20,12 @@ import {
   , GAME_REMOVE_KEEPALIVE
 } from './gameReducer/game.actions'
 import { SYNC } from './syncMiddleware/sync.action'
+import url from 'url'
+import { MULTI_ACTION } from './multiActionMiddleware/multiAction.actions'
+
+const currentUrl = url.parse(window.location.href)
+const urlPathParts = currentUrl.pathname!.split('/')
+const storeId = urlPathParts[2]
 
 const store = createStore(
   rootReducer,
@@ -29,6 +35,7 @@ const store = createStore(
     , createSyncMiddleware(
       'ws://localhost:3200',
       getDispatch,
+      storeId,
       action =>
         action.type == SYNC
         || action.type == GAME_ADD_PLAYER
@@ -41,6 +48,7 @@ const store = createStore(
         || action.type == GAME_RESET_SIPS
         || action.type == GAME_KEEPALIVE
         || action.type == GAME_REMOVE_KEEPALIVE
+        || action.type == MULTI_ACTION // TODO do not accept all multi action
     )
     , multiAction
   )),
@@ -53,6 +61,7 @@ function getDispatch(): Dispatch<Action> {
 // TODO:
 // const playerName = 'player' + Math.round(Math.random() * 10000)
 // store.dispatch(ChangeNickName(playerName))
+console.log('DISPATCH')
 ThunkJoinGame()(store.dispatch, store.getState, undefined)
 
 setInterval(() => {

@@ -2,11 +2,35 @@ import { Middleware, Action } from "redux";
 import { SYNC, Sync } from "./sync.action";
 import { Dispatch } from "react";
 
-function createSyncMiddleware(address: string, getDispatch: () => Dispatch<Action>, filter: undefined | ((action: Action) => boolean) = undefined): Middleware {
+function createSyncMiddleware(
+    address: string
+    , getDispatch: () => Dispatch<Action>
+    , storeId: string
+    , filter: undefined | ((action: Action) => boolean) = undefined
+): Middleware {
 
     const ws = new WebSocket(address);
 
+    let toSend: string[] = []
+
+    ws.onopen = function () {
+        const message = JSON.stringify({
+            type: 'CONNECT',
+            payload: {
+                storeId: storeId
+            }
+        })
+        console.log('Sending: ' + message)
+        ws.send(message)
+        while (toSend.length != 0) {
+            const message = toSend.shift()!
+            console.log('Sending: ' + message)
+            ws.send(message)
+        }
+    }
+
     ws.onmessage = function (event) {
+        console.log(event.data)
         const action = JSON.parse(event.data)
         if (filter != undefined && filter(action)) {
             getDispatch()(Sync(action))
@@ -18,7 +42,19 @@ function createSyncMiddleware(address: string, getDispatch: () => Dispatch<Actio
             while (ws.readyState === 0) {
                 await new Promise(r => setTimeout(r, 200))
             }
-            ws.send(JSON.stringify(action))
+            const message = JSON.stringify({
+                type: 'BROADCAST',
+                payload: {
+                    storeId: storeId,
+                    action: action
+                }
+            })
+            if (ws.readyState === WebSocket.OPEN && toSend.length == 0) {
+                console.log('Sending: ' + message)
+                ws.send(message)
+            } else {
+                toSend.push(message)
+            }
         }
         if (action.type === SYNC) {
             next(action.payload.action)
