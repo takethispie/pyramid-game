@@ -6,6 +6,6 @@ export interface HandState {
     Hand: Card[];
     IsLoading: boolean;
     CardSelectionStep: boolean;
-    HasSelectedCard: boolean;
     SelectedCardIndex: number; 
+    ErrorMessage: string;
 }

@@ -21,15 +21,20 @@ import { connect, ConnectedProps, Provider } from "react-redux";
 import { ThunkRevealNextCard, ThunkGeneratePyramid } from "stores/boardReducer/board.thunk";
 import store from "stores";
 import Hand from "components/Hand";
+import { ThunkLoadHand } from "stores/handReducer/hand.thunk";
 
 const mapState = (state: RootState) => ({
   pyramid: state.boardReducer.Pyramid,
   boardError: state.boardReducer.ErrorMessage,
+  hand: state.handReducer.Hand,
+  nickname: state.matchReducer.NickName,
+  matchId: state.matchReducer.MatchId,
+  cardStack: state.boardReducer.CardStack
 });
 
 const mapDispatch = {
   revealCard: ThunkRevealNextCard,
-  generatePyramid: ThunkGeneratePyramid
+  loadHand: ThunkLoadHand
 };
 
 const connector = connect(mapState, mapDispatch);
@@ -39,8 +44,9 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 type Props = PropsFromRedux & {};
 
-const Board: React.FC<Props> = ({ revealCard, pyramid, boardError }) => {
+const Board: React.FC<Props> = ({ revealCard, pyramid, boardError, hand, loadHand, nickname, matchId, cardStack }) => {
 
+  if(hand.length === 0) loadHand(nickname, matchId, cardStack);
 
   return (
     <IonPage>

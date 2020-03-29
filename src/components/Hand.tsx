@@ -23,7 +23,7 @@ type Props = PropsFromRedux & props;
 
 
 const Hand: React.FC<Props> = ({ cardsInHand }) => {
-    let x: number = 600;
+    let x: number = 700;
     let y: number = 600;
     return (
         <>

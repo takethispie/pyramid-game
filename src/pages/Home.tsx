@@ -23,11 +23,16 @@ import { ThunkGeneratePyramid } from "stores/boardReducer/board.thunk";
 import { connect } from "react-redux";
 import { ConnectedProps } from "react-redux";
 import { RouteComponentProps, withRouter } from "react-router";
+import { ThunkLoadHand } from "stores/handReducer/hand.thunk";
 
-const mapState = (state: RootState) => ({});
+const mapState = (state: RootState) => ({
+  cardStack: state.boardReducer.CardStack,
+  nickname: state.matchReducer.NickName,
+  gameId: state.matchReducer.MatchId,
+});
 
 const mapDispatch = {
-  generatePyramid: ThunkGeneratePyramid
+  generatePyramid: ThunkGeneratePyramid,
 };
 
 const connector = connect(mapState, mapDispatch);
@@ -37,7 +42,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 type Props = PropsFromRedux & RouteComponentProps & {};
 
-const Home: React.FC<Props> = ({ generatePyramid, history }) => {
+const Home: React.FC<Props> = ({ generatePyramid, history, nickname, gameId, cardStack}) => {
   const newGame = () => {
     generatePyramid();
     history.push("/board");

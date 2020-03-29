@@ -3,21 +3,15 @@ import { ThunkAction } from "redux-thunk";
 import { Action } from "redux";
 import { LoadHand, LoadHandSuccess, LoadHandError, ShowHandHidden, ShowHandVisible, HideHand, ChooseCard, ChooseCardSuccess } from "./hand.actions";
 import { Card } from "models/Card";
-import { CardName } from "models/CardName";
+import { CreateHand } from "models/GameBoard";
 
-export const ThunkLoadHand = (nickname: string, gameId: string): ThunkAction<void, HandState, unknown, Action<string>> => async dispatch => {
+export const ThunkLoadHand = (nickname: string, gameId: string, cardStack: Card[]): ThunkAction<void, HandState, unknown, Action<string>> => async dispatch => {
     dispatch(LoadHand(nickname, gameId));
     try {
-        //async firebase calls
-        let result: Card[] = [
-            new Card(CardName.C4, 0, 0, 0),
-            new Card(CardName.D10, 0, 0, 0),
-            new Card(CardName.HA, 0, 0, 0),
-            new Card(CardName.HK, 0, 0, 0)
-        ];
-        dispatch(LoadHandSuccess(result));
+        let result = CreateHand(cardStack);
+        dispatch(LoadHandSuccess(result.hand));
     } catch (error) {
-        dispatch(LoadHandError(error));
+        dispatch(LoadHandError(error || "Erreur inconnue"));
     }
 }
 

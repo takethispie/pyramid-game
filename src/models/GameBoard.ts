@@ -53,3 +53,14 @@ export const CreatePyramid = (randomizedCard: string[]) => {
     let cardStack = cards.map(card => new Card(card as CardName, 0, 0, 0));
     return {pyramid, cardStack};
 }
+
+export const CreateHand = (cardStack: Card[]) => {
+    let cards: Card[] = [...cardStack];
+    let hand: Card[] = [];
+    for(let i = 0; i < 4; i++) {
+        let next = cards.pop();
+        if(!next) throw Error("Pas assez de carte pour le joueur !");
+        hand.push(next);
+    } 
+    return {hand, cards};
+}

@@ -19,14 +19,14 @@ interface LoadHand {
   };
 }
 
-interface LoadhandSuccess {
+interface LoadHandSuccess {
   type: typeof LOAD_HAND_SUCCESS;
   payload: {
     cards: Card[];
   };
 }
 
-interface LoadhandError {
+interface LoadHandError {
   type: typeof LOAD_HAND_ERROR;
   payload: {
     errorMessage: string;
@@ -59,8 +59,8 @@ interface ChooseCardSuccess {
 
 export type HandActionsTypes =
   | LoadHand
-  | LoadhandSuccess
-  | LoadhandError
+  | LoadHandSuccess
+  | LoadHandError
   | ShowHandVisible
   | ShowHandHidden
   | HideHand
