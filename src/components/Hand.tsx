@@ -33,7 +33,7 @@ const Hand: React.FC<Props> = ({ cardsInHand }) => {
                     noPositionCard.Y = y;
                     x += 125;
                     return noPositionCard;
-                }).map(card => <CardComponent card={card} color={"blue"}></CardComponent>)
+                }).map(card => <CardComponent key={card.Name} card={card} color={"blue"}></CardComponent>)
             }
         </>
     );

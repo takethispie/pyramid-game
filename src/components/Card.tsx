@@ -5,7 +5,6 @@ import { Card } from 'models/Card';
 import { ConnectedProps, connect } from 'react-redux';
 import { RootState } from 'stores/root.reducer';
 import { ThunkRevealNextCardSuccess } from 'stores/boardReducer/board.thunk';
-import { RevealCardSuccess } from 'stores/boardReducer/board.action';
 
 interface props {
     card: Card,

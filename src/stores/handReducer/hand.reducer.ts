@@ -36,7 +36,7 @@ const HandReducer = (state: HandState = defaultHandState, action: HandActionsTyp
             return {...state, CardSelectionStep: true, ErrorMessage: ""};
 
         case CHOOSE_CARD_SUCCESS:
-            return {...state, SelectedCardIndex: action.payload.index }
+            return {...state, SelectedCardIndex: action.payload.index, CardSelectionStep: false }
 
         default:
             return state;
