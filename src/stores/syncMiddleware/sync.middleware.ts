@@ -1,35 +1,71 @@
 import { Middleware, Action } from "redux";
-import { SYNC, Sync } from "./sync.action";
+import { SYNC, Sync, SyncReset } from "./sync.action";
 import { Dispatch } from "react";
+import { ThunkJoinGame, ThunkKeepAlive, ThunkKickInactivePlayers } from "stores/gameReducer/game.thunk";
+import store from "stores";
+import { KEEPALIVE_TIMEOUT_MS } from "stores/gameReducer/game.state";
+
+let storeId_: string | undefined = undefined
+let ws_: WebSocket | undefined = undefined
+let keepaliveInterval_: NodeJS.Timeout | undefined = undefined
+let datasToSend: (string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView)[] = []
+
+function sendData(data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView) {
+    if (ws_!.readyState === WebSocket.OPEN) {
+        while (datasToSend.length > 0) {
+            const message = datasToSend.pop()!
+            console.log('Sending: ' + message)
+            ws_!.send(message)
+        }
+
+        console.log('Sending: ' + data)
+        ws_!.send(data)
+    } else {
+        datasToSend.push(data)
+    }
+}
+
+export function connectToRoom(
+    storeId: string
+    , getDispatch: () => Dispatch<Action>
+) {
+    storeId_ = storeId
+    const message = JSON.stringify({
+        type: 'CONNECT',
+        payload: {
+            storeId: storeId
+        }
+    })
+    sendData(message)
+    getDispatch()(SyncReset())
+    ThunkJoinGame()(store.dispatch, store.getState, undefined)
+    if (keepaliveInterval_) {
+        clearInterval(keepaliveInterval_)
+        keepaliveInterval_ = undefined
+    }
+    keepaliveInterval_ = setInterval(() => {
+        ThunkKeepAlive()(store.dispatch, store.getState, undefined)
+        ThunkKickInactivePlayers()(store.dispatch, store.getState, undefined)
+    }, KEEPALIVE_TIMEOUT_MS / 2)
+}
 
 function createSyncMiddleware(
     address: string
     , getDispatch: () => Dispatch<Action>
-    , storeId: string
     , filter: undefined | ((action: Action) => boolean) = undefined
 ): Middleware {
 
-    const ws = new WebSocket(address);
+    ws_ = new WebSocket(address);
 
-    let toSend: string[] = []
-
-    ws.onopen = function () {
-        const message = JSON.stringify({
-            type: 'CONNECT',
-            payload: {
-                storeId: storeId
-            }
-        })
-        console.log('Sending: ' + message)
-        ws.send(message)
-        while (toSend.length != 0) {
-            const message = toSend.shift()!
+    ws_.onopen = function () {
+        while (datasToSend.length > 0) {
+            const message = datasToSend.pop()!
             console.log('Sending: ' + message)
-            ws.send(message)
+            ws_!.send(message)
         }
     }
 
-    ws.onmessage = function (event) {
+    ws_.onmessage = function (event) {
         console.log(event.data)
         const action = JSON.parse(event.data)
         if (filter != undefined && filter(action)) {
@@ -38,29 +74,24 @@ function createSyncMiddleware(
     }
 
     return () => next => action => {
-        const send = async (action: Action) => {
-            while (ws.readyState === 0) {
+        const sendAction = async (action: Action) => {
+            while (ws_!.readyState === 0) {
                 await new Promise(r => setTimeout(r, 200))
             }
             const message = JSON.stringify({
                 type: 'BROADCAST',
                 payload: {
-                    storeId: storeId,
+                    storeId: storeId_!,
                     action: action
                 }
             })
-            if (ws.readyState === WebSocket.OPEN && toSend.length == 0) {
-                console.log('Sending: ' + message)
-                ws.send(message)
-            } else {
-                toSend.push(message)
-            }
+            sendData(message)
         }
         if (action.type === SYNC) {
             next(action.payload.action)
         } else {
             if (filter != undefined && filter(action)) {
-                send(action)
+                sendAction(action)
             }
             next(action)
         }

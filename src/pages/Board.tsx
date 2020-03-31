@@ -15,7 +15,7 @@ import {
   IonFooter,
   IonProgressBar
 } from "@ionic/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { Stage, Layer } from "react-konva";
 import Card from "components/Card";
 import { RootState } from "stores/root.reducer";
@@ -24,6 +24,9 @@ import { ThunkRevealNextCard, ThunkGeneratePyramid } from "stores/boardReducer/b
 import store from "stores";
 import Hand from "components/Hand";
 import { ThunkLoadHand } from "stores/handReducer/hand.thunk";
+import { connectToRoom } from "stores/syncMiddleware/sync.middleware";
+import { ThunkLeaveGame } from "stores/gameReducer/game.thunk";
+import { useBeforeunload } from "react-beforeunload";
 
 const mapState = (state: RootState) => ({
   pyramid: state.boardReducer.Pyramid,
@@ -36,7 +39,8 @@ const mapState = (state: RootState) => ({
 
 const mapDispatch = {
   revealCard: ThunkRevealNextCard,
-  loadHand: ThunkLoadHand
+  loadHand: ThunkLoadHand,
+  leaveGame: ThunkLeaveGame
 };
 
 const connector = connect(mapState, mapDispatch);
@@ -46,9 +50,19 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 type Props = PropsFromRedux & {};
 
-const Board: React.FC<Props> = ({ revealCard, pyramid, boardError, hand, loadHand, nickname, matchId, cardStack }) => {
+const Board: React.FC<Props> = ({ revealCard, pyramid, boardError, hand, loadHand, nickname, matchId, cardStack, leaveGame }) => {
 
-  if(hand.length === 0) loadHand(nickname, matchId, cardStack);
+  if (hand.length === 0) loadHand(nickname, matchId, cardStack);
+
+  useEffect(() => {
+    const urlPathParts = window.location.pathname!.split('/')
+    if (urlPathParts[1] == 'board' && urlPathParts.length >= 3) {
+      const storeId = urlPathParts[2]
+      connectToRoom(storeId, () => store.dispatch)
+    }
+  })
+
+  useBeforeunload(() => leaveGame());
 
   return (
     <IonPage>

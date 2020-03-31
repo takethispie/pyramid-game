@@ -24,8 +24,6 @@ import url from 'url'
 import { MULTI_ACTION } from './multiActionMiddleware/multiAction.actions'
 
 const currentUrl = url.parse(window.location.href)
-const urlPathParts = currentUrl.pathname!.split('/')
-const storeId = urlPathParts[2]
 
 const store = createStore(
   rootReducer,
@@ -35,7 +33,6 @@ const store = createStore(
     , createSyncMiddleware(
       'ws://' + currentUrl.hostname + ':3200',
       getDispatch,
-      storeId,
       action =>
         action.type == SYNC
         || action.type == GAME_ADD_PLAYER
@@ -57,16 +54,5 @@ const store = createStore(
 function getDispatch(): Dispatch<Action> {
   return store.dispatch
 }
-
-// TODO:
-// const playerName = 'player' + Math.round(Math.random() * 10000)
-// store.dispatch(ChangeNickName(playerName))
-console.log('DISPATCH')
-ThunkJoinGame()(store.dispatch, store.getState, undefined)
-
-setInterval(() => {
-  ThunkKeepAlive()(store.dispatch, store.getState, undefined)
-  ThunkKickInactivePlayers()(store.dispatch, store.getState, undefined)
-}, KEEPALIVE_TIMEOUT_MS / 2)
 
 export default store

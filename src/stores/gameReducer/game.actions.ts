@@ -1,3 +1,5 @@
+import { SyncResetAction } from '../syncMiddleware/sync.action'
+
 // ----- GAME_ADD_PLAYER -----
 
 export const GAME_ADD_PLAYER = "GAME_ADD_PLAYER"
@@ -208,7 +210,8 @@ export function GameRemoveKeepAlive(player: string): GameRemoveKeepAliveAction {
 // -----
 
 export type GameActionsTypes
-    = GameAddPlayerAction
+    = SyncResetAction
+    | GameAddPlayerAction
     | GameRemovePlayerAction
     | GameAddTargetAction
     | GameRemoveTargetAction

@@ -16,3 +16,16 @@ export function Sync(action: Action): SyncAction {
         }
     }
 }
+
+export const SYNC_RESET = 'SYNC_RESET'
+export interface SyncResetAction {
+    type: typeof SYNC_RESET,
+    payload: {}
+}
+
+export function SyncReset(): SyncResetAction {
+    return {
+        type: SYNC_RESET,
+        payload: {}
+    }
+}
