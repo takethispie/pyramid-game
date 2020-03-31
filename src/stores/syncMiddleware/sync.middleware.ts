@@ -8,45 +8,62 @@ import { KEEPALIVE_TIMEOUT_MS } from "stores/gameReducer/game.state";
 let storeId_: string | undefined = undefined
 let ws_: WebSocket | undefined = undefined
 let keepaliveInterval_: NodeJS.Timeout | undefined = undefined
-let datasToSend: (string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView)[] = []
+let connectToRoomSuccess_: ((value?: void | PromiseLike<void> | undefined) => void) | undefined = undefined
 
-function sendData(data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView) {
-    if (ws_!.readyState === WebSocket.OPEN) {
-        while (datasToSend.length > 0) {
-            const message = datasToSend.pop()!
-            console.log('Sending: ' + message)
-            ws_!.send(message)
+type DataToSend = {
+    data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView
+    callback: (value?: void | PromiseLike<void> | undefined) => void
+}
+let datasToSend: DataToSend[] = []
+
+function sendData(data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView): Promise<void> {
+    return new Promise((success, failure) => {
+        if (ws_!.readyState === WebSocket.OPEN) {
+            while (datasToSend.length > 0) {
+                const dataToSend = datasToSend.pop()!
+                console.log('Sending: ' + dataToSend)
+                ws_!.send(dataToSend.data)
+                dataToSend.callback()
+            }
+
+            console.log('Sending: ' + data)
+            ws_!.send(data)
+            success()
+        } else {
+            datasToSend.push({
+                data,
+                callback: success
+            })
         }
-
-        console.log('Sending: ' + data)
-        ws_!.send(data)
-    } else {
-        datasToSend.push(data)
-    }
+    })
 }
 
 export function connectToRoom(
     storeId: string
     , getDispatch: () => Dispatch<Action>
-) {
-    storeId_ = storeId
-    const message = JSON.stringify({
-        type: 'CONNECT',
-        payload: {
-            storeId: storeId
-        }
+): Promise<void> {
+    return new Promise((success, failure) => {
+        storeId_ = storeId
+        connectToRoomSuccess_ = success
+        const message = JSON.stringify({
+            type: 'CONNECT',
+            payload: {
+                storeId: storeId
+            }
+        })
+        sendData(message).then(() => {
+            // getDispatch()(SyncReset())
+            ThunkJoinGame()(store.dispatch, store.getState, undefined)
+            if (keepaliveInterval_) {
+                clearInterval(keepaliveInterval_)
+                keepaliveInterval_ = undefined
+            }
+            keepaliveInterval_ = setInterval(() => {
+                ThunkKeepAlive()(store.dispatch, store.getState, undefined)
+                ThunkKickInactivePlayers()(store.dispatch, store.getState, undefined)
+            }, KEEPALIVE_TIMEOUT_MS / 2)
+        })
     })
-    sendData(message)
-    getDispatch()(SyncReset())
-    ThunkJoinGame()(store.dispatch, store.getState, undefined)
-    if (keepaliveInterval_) {
-        clearInterval(keepaliveInterval_)
-        keepaliveInterval_ = undefined
-    }
-    keepaliveInterval_ = setInterval(() => {
-        ThunkKeepAlive()(store.dispatch, store.getState, undefined)
-        ThunkKickInactivePlayers()(store.dispatch, store.getState, undefined)
-    }, KEEPALIVE_TIMEOUT_MS / 2)
 }
 
 function createSyncMiddleware(
@@ -59,16 +76,21 @@ function createSyncMiddleware(
 
     ws_.onopen = function () {
         while (datasToSend.length > 0) {
-            const message = datasToSend.pop()!
-            console.log('Sending: ' + message)
-            ws_!.send(message)
+            const dataToSend = datasToSend.pop()!
+            console.log('Sending: ' + dataToSend.data)
+            ws_!.send(dataToSend.data)
+            dataToSend.callback()
         }
     }
 
     ws_.onmessage = function (event) {
         console.log(event.data)
         const action = JSON.parse(event.data)
-        if (filter != undefined && filter(action)) {
+        if (action.type == 'CONNECTED') {
+            if (action.payload.storeId == storeId_ && connectToRoomSuccess_) {
+                connectToRoomSuccess_()
+            }
+        } else if (filter != undefined && filter(action)) {
             getDispatch()(Sync(action))
         }
     }

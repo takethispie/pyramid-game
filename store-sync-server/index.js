@@ -28,6 +28,12 @@ wss.on('connection', ws => {
                 for (const data of history[message.payload.storeId]) {
                     ws.send(JSON.stringify(data))
                 }
+                ws.send(JSON.stringify({
+                    type: 'CONNECTED',
+                    payload: {
+                        storeId: message.payload.storeId
+                    }
+                }))
                 break
             case 'BROADCAST':
                 history[message.payload.storeId].push(message.payload.action)

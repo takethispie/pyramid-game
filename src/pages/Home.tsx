@@ -56,7 +56,6 @@ const Home: React.FC<Props> = ({ generatePyramid, history, nickname, gameId, car
     //generatePyramid();
     const storeId = generateUniqueString(5)
     history.push("/board/" + storeId);
-    connectToRoom(storeId, () => store.dispatch)
   }
 
   return (

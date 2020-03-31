@@ -15,7 +15,7 @@ import {
   IonFooter,
   IonProgressBar
 } from "@ionic/react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Stage, Layer } from "react-konva";
 import Card from "components/Card";
 import { RootState } from "stores/root.reducer";
@@ -40,7 +40,8 @@ const mapState = (state: RootState) => ({
 const mapDispatch = {
   revealCard: ThunkRevealNextCard,
   loadHand: ThunkLoadHand,
-  leaveGame: ThunkLeaveGame
+  leaveGame: ThunkLeaveGame,
+  generatePyramid: ThunkGeneratePyramid
 };
 
 const connector = connect(mapState, mapDispatch);
@@ -50,17 +51,27 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 type Props = PropsFromRedux & {};
 
-const Board: React.FC<Props> = ({ revealCard, pyramid, boardError, hand, loadHand, nickname, matchId, cardStack, leaveGame }) => {
+const Board: React.FC<Props> = ({ revealCard, pyramid, boardError, hand, loadHand, nickname, matchId, cardStack, leaveGame, generatePyramid }) => {
 
   if (hand.length === 0) loadHand(nickname, matchId, cardStack);
+
+  const [connectedRoom, setConnectedRoom] = useState('')
 
   useEffect(() => {
     const urlPathParts = window.location.pathname!.split('/')
     if (urlPathParts[1] == 'board' && urlPathParts.length >= 3) {
       const storeId = urlPathParts[2]
-      connectToRoom(storeId, () => store.dispatch)
+      if (connectedRoom != storeId) {
+        setConnectedRoom(storeId)
+        connectToRoom(storeId, () => store.dispatch).then(() => {
+          console.log('CONNECTED')
+          if (store.getState().boardReducer.Pyramid.length == 0) {
+            generatePyramid()
+          }
+        })
+      }
     }
-  })
+  }, [connectedRoom, pyramid.length, generatePyramid])
 
   useBeforeunload(() => leaveGame());
 
