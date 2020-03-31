@@ -11,7 +11,9 @@ import {
   IonCol,
   IonItem,
   IonButton,
-  IonToast
+  IonToast,
+  IonFooter,
+  IonProgressBar
 } from "@ionic/react";
 import React from "react";
 import { Stage, Layer } from "react-konva";
@@ -79,15 +81,13 @@ const Board: React.FC<Props> = ({ revealCard, pyramid, boardError, hand, loadHan
               </Provider>
             </Stage>
           </IonRow>
-          <IonRow>
-            <IonCol>
-              <IonItem>
-                <IonButton onClick={() => revealCard()}>test</IonButton>
-              </IonItem>
-            </IonCol>
-          </IonRow>
         </IonGrid>
       </IonContent>
+      <IonFooter>
+        <IonToolbar>
+          <IonProgressBar value={0.5}></IonProgressBar>
+        </IonToolbar>
+      </IonFooter>
     </IonPage>
   );
 };
