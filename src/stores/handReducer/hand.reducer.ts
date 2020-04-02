@@ -11,16 +11,22 @@ import {
   CHOOSE_CARD_SUCCESS
 } from "./hand.actions";
 import { HandStep } from "models/HandStep";
+import { Card } from "models/Card";
 
 export const defaultHandState: HandState = {
   IsLoading: false,
-  showCardsHidden: false,
-  showCardsVisible: false,
+  handVisible: false,
   Hand: [],
   Step: HandStep.Idle,
   SelectedCardIndex: -1,
   ErrorMessage: ""
 };
+
+const mapHandVisibility = (cards: Card[], visibility: boolean) =>
+  cards.map(card => {
+    card.Visible = visibility;
+    return card;
+});
 
 const HandReducer = (
   state: HandState = defaultHandState,
@@ -41,13 +47,25 @@ const HandReducer = (
       };
 
     case SHOW_HAND_VISIBLE:
-      return { ...state, showCardsHidden: false, showCardsVisible: true };
+      return {
+        ...state,
+        handVisible: true,
+        Hand: mapHandVisibility(state.Hand, true)
+      };
 
     case SHOW_HAND_HIDDEN:
-      return { ...state, showCardsHidden: true, showCardsVisible: false };
+      return {
+        ...state,
+        handVisible: true,
+        Hand: mapHandVisibility(state.Hand, false)
+      };
 
     case HIDE_HAND:
-      return { ...state, showCardsHidden: false, showCardsVisible: false };
+      return {
+        ...state,
+        handVisible: false,
+        Hand: mapHandVisibility(state.Hand, false)
+      };
 
     case CHOOSE_CARD:
       return { ...state, Step: HandStep.Choose, ErrorMessage: "" };
@@ -58,7 +76,7 @@ const HandReducer = (
         SelectedCardIndex: action.payload.index,
         Step: HandStep.Idle,
         Hand: state.Hand.map((card, id) => {
-          if (action.payload.index == id) card.Visible = true;
+          if (action.payload.index === id) card.Visible = true;
           return card;
         })
       };
