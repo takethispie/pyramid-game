@@ -1,13 +1,12 @@
+import WebSocket from 'ws'
+
 const port = 3200
-const WebSocket = require('ws')
-
-const history = {}
-
+const history: { [id: string]: any } = {}
 const wss = new WebSocket.Server({ port: port })
 
 console.log('[' + (new Date).toISOString() + '] Listening on ' + port)
 
-wss.on('connection', ws => {
+wss.on('connection', (ws: any) => {
 
     console.log('[' + (new Date).toISOString() + '] New client')
 
@@ -15,7 +14,7 @@ wss.on('connection', ws => {
         console.log('[' + (new Date).toISOString() + '] Client disconnected')
     })
 
-    ws.on('message', function incoming(data) {
+    ws.on('message', (data: any) => {
         console.log('[' + (new Date).toISOString() + '] Received: ' + data)
         const message = JSON.parse(data)
         switch (message.type) {
@@ -37,7 +36,7 @@ wss.on('connection', ws => {
                 break
             case 'BROADCAST':
                 history[message.payload.storeId].push(message.payload.action)
-                wss.clients.forEach(client => {
+                wss.clients.forEach((client: any) => {
                     if (client !== ws && client.readyState === WebSocket.OPEN && client.storeId == message.payload.storeId) {
                         client.send(JSON.stringify(message.payload.action));
                     }
