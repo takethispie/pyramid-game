@@ -21,12 +21,10 @@ function sendData(data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayB
         if (ws_!.readyState === WebSocket.OPEN) {
             while (datasToSend.length > 0) {
                 const dataToSend = datasToSend.pop()!
-                console.log('Sending: ' + dataToSend)
                 ws_!.send(dataToSend.data)
                 dataToSend.callback()
             }
 
-            console.log('Sending: ' + data)
             ws_!.send(data)
             success()
         } else {
@@ -77,14 +75,12 @@ function createSyncMiddleware(
     ws_.onopen = function () {
         while (datasToSend.length > 0) {
             const dataToSend = datasToSend.pop()!
-            console.log('Sending: ' + dataToSend.data)
             ws_!.send(dataToSend.data)
             dataToSend.callback()
         }
     }
 
     ws_.onmessage = function (event) {
-        console.log(event.data)
         const action = JSON.parse(event.data)
         if (action.type == 'CONNECTED') {
             if (action.payload.storeId == storeId_ && connectToRoomSuccess_) {

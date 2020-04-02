@@ -103,7 +103,6 @@ const Board: React.FC<Props> = ({
       if (connectedRoom != storeId) {
         setConnectedRoom(storeId)
         connectToRoom(storeId, () => store.dispatch).then(() => {
-          console.log('CONNECTED')
           if (store.getState().boardReducer.Pyramid.length == 0) {
             generatePyramid()
           }
