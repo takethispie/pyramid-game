@@ -1,4 +1,5 @@
 import { Card } from "models/Card";
+import { SyncResetAction } from "stores/syncMiddleware/sync.action";
 
 export const REVEAL_CARD = "REVEAL_CARD";
 export const REVEAL_CARD_SUCCESS = "REVEAL_CARD_SUCCESS";
@@ -6,7 +7,7 @@ export const REVEAL_CARD_ERROR = "REVEAL_CARD_ERROR";
 
 export const GENERATE_PYRAMID = "GENERATE_PYRAMID";
 export const GENERATE_PYRAMID_SUCCESS = "GENERATE_PYRAMID_SUCCESS";
-export const GENERATE_PYRAMID_ERROR = "GENERATE_PYRAMID_ERROR"; 
+export const GENERATE_PYRAMID_ERROR = "GENERATE_PYRAMID_ERROR";
 
 interface RevealCard {
     type: typeof REVEAL_CARD;
@@ -49,8 +50,8 @@ interface GeneratePyramidError {
     }
 }
 
-export type BoardActionsTypes = RevealCard | RevealCardSuccess | RevealCardError 
-| GeneratePyramid | GeneratePyramidSuccess | GeneratePyramidError;
+export type BoardActionsTypes = RevealCard | RevealCardSuccess | RevealCardError
+    | GeneratePyramid | GeneratePyramidSuccess | GeneratePyramidError | SyncResetAction;
 
 
 export function RevealCard(): BoardActionsTypes {

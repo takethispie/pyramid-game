@@ -37,7 +37,7 @@ const App: React.FC = () => {
       <IonApp>
         <IonReactRouter>
           <IonSplitPane contentId="main">
-            <Menu selectedPage={selectedPage} />
+            <Menu /*selectedPage={selectedPage}*/ />
             <IonRouterOutlet id="main">
               <Route path="/board" render={() => {
                 return <Board />;

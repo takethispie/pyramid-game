@@ -22,10 +22,9 @@ import {
 import { SYNC } from './syncMiddleware/sync.action'
 import url from 'url'
 import { MULTI_ACTION } from './multiActionMiddleware/multiAction.actions'
+import { GENERATE_PYRAMID_ERROR, GENERATE_PYRAMID_SUCCESS, GENERATE_PYRAMID, REVEAL_CARD, REVEAL_CARD_SUCCESS, REVEAL_CARD_ERROR } from './boardReducer/board.action'
 
 const currentUrl = url.parse(window.location.href)
-const urlPathParts = currentUrl.pathname!.split('/')
-const storeId = urlPathParts[2]
 
 const store = createStore(
   rootReducer,
@@ -35,7 +34,6 @@ const store = createStore(
     , createSyncMiddleware(
       'ws://' + currentUrl.hostname + ':3200',
       getDispatch,
-      storeId,
       action =>
         action.type == SYNC
         || action.type == GAME_ADD_PLAYER
@@ -49,6 +47,9 @@ const store = createStore(
         || action.type == GAME_KEEPALIVE
         || action.type == GAME_REMOVE_KEEPALIVE
         || action.type == MULTI_ACTION // TODO do not accept all multi action
+        || action.type == GENERATE_PYRAMID
+        || action.type == GENERATE_PYRAMID_SUCCESS
+        || action.type == GENERATE_PYRAMID_ERROR
     )
     , multiAction
   )),
@@ -57,16 +58,5 @@ const store = createStore(
 function getDispatch(): Dispatch<Action> {
   return store.dispatch
 }
-
-// TODO:
-// const playerName = 'player' + Math.round(Math.random() * 10000)
-// store.dispatch(ChangeNickName(playerName))
-console.log('DISPATCH')
-ThunkJoinGame()(store.dispatch, store.getState, undefined)
-
-setInterval(() => {
-  ThunkKeepAlive()(store.dispatch, store.getState, undefined)
-  ThunkKickInactivePlayers()(store.dispatch, store.getState, undefined)
-}, KEEPALIVE_TIMEOUT_MS / 2)
 
 export default store

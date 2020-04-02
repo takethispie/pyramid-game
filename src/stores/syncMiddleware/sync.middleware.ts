@@ -1,66 +1,119 @@
 import { Middleware, Action } from "redux";
-import { SYNC, Sync } from "./sync.action";
+import { SYNC, Sync, SyncReset } from "./sync.action";
 import { Dispatch } from "react";
+import { ThunkJoinGame, ThunkKeepAlive, ThunkKickInactivePlayers } from "stores/gameReducer/game.thunk";
+import store from "stores";
+import { KEEPALIVE_TIMEOUT_MS } from "stores/gameReducer/game.state";
 
-function createSyncMiddleware(
-    address: string
+let storeId_: string | undefined = undefined
+let ws_: WebSocket | undefined = undefined
+let keepaliveInterval_: NodeJS.Timeout | undefined = undefined
+let connectToRoomSuccess_: ((value?: void | PromiseLike<void> | undefined) => void) | undefined = undefined
+
+type DataToSend = {
+    data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView
+    callback: (value?: void | PromiseLike<void> | undefined) => void
+}
+let datasToSend: DataToSend[] = []
+
+function sendData(data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView): Promise<void> {
+    return new Promise((success, failure) => {
+        if (ws_!.readyState === WebSocket.OPEN) {
+            while (datasToSend.length > 0) {
+                const dataToSend = datasToSend.pop()!
+                console.log('Sending: ' + dataToSend)
+                ws_!.send(dataToSend.data)
+                dataToSend.callback()
+            }
+
+            console.log('Sending: ' + data)
+            ws_!.send(data)
+            success()
+        } else {
+            datasToSend.push({
+                data,
+                callback: success
+            })
+        }
+    })
+}
+
+export function connectToRoom(
+    storeId: string
     , getDispatch: () => Dispatch<Action>
-    , storeId: string
-    , filter: undefined | ((action: Action) => boolean) = undefined
-): Middleware {
-
-    const ws = new WebSocket(address);
-
-    let toSend: string[] = []
-
-    ws.onopen = function () {
+): Promise<void> {
+    return new Promise((success, failure) => {
+        storeId_ = storeId
+        connectToRoomSuccess_ = success
         const message = JSON.stringify({
             type: 'CONNECT',
             payload: {
                 storeId: storeId
             }
         })
-        console.log('Sending: ' + message)
-        ws.send(message)
-        while (toSend.length != 0) {
-            const message = toSend.shift()!
-            console.log('Sending: ' + message)
-            ws.send(message)
+        sendData(message).then(() => {
+            // getDispatch()(SyncReset())
+            ThunkJoinGame()(store.dispatch, store.getState, undefined)
+            if (keepaliveInterval_) {
+                clearInterval(keepaliveInterval_)
+                keepaliveInterval_ = undefined
+            }
+            keepaliveInterval_ = setInterval(() => {
+                ThunkKeepAlive()(store.dispatch, store.getState, undefined)
+                ThunkKickInactivePlayers()(store.dispatch, store.getState, undefined)
+            }, KEEPALIVE_TIMEOUT_MS / 2)
+        })
+    })
+}
+
+function createSyncMiddleware(
+    address: string
+    , getDispatch: () => Dispatch<Action>
+    , filter: undefined | ((action: Action) => boolean) = undefined
+): Middleware {
+
+    ws_ = new WebSocket(address);
+
+    ws_.onopen = function () {
+        while (datasToSend.length > 0) {
+            const dataToSend = datasToSend.pop()!
+            console.log('Sending: ' + dataToSend.data)
+            ws_!.send(dataToSend.data)
+            dataToSend.callback()
         }
     }
 
-    ws.onmessage = function (event) {
+    ws_.onmessage = function (event) {
         console.log(event.data)
         const action = JSON.parse(event.data)
-        if (filter != undefined && filter(action)) {
+        if (action.type == 'CONNECTED') {
+            if (action.payload.storeId == storeId_ && connectToRoomSuccess_) {
+                connectToRoomSuccess_()
+            }
+        } else if (filter != undefined && filter(action)) {
             getDispatch()(Sync(action))
         }
     }
 
     return () => next => action => {
-        const send = async (action: Action) => {
-            while (ws.readyState === 0) {
+        const sendAction = async (action: Action) => {
+            while (ws_!.readyState === 0) {
                 await new Promise(r => setTimeout(r, 200))
             }
             const message = JSON.stringify({
                 type: 'BROADCAST',
                 payload: {
-                    storeId: storeId,
+                    storeId: storeId_!,
                     action: action
                 }
             })
-            if (ws.readyState === WebSocket.OPEN && toSend.length == 0) {
-                console.log('Sending: ' + message)
-                ws.send(message)
-            } else {
-                toSend.push(message)
-            }
+            sendData(message)
         }
         if (action.type === SYNC) {
             next(action.payload.action)
         } else {
             if (filter != undefined && filter(action)) {
-                send(action)
+                sendAction(action)
             }
             next(action)
         }

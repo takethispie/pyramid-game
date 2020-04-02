@@ -13,6 +13,8 @@ import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { personOutline, homeOutline, playOutline } from 'ionicons/icons';
 import './Menu.css';
+import { RootState } from 'stores/root.reducer';
+import { ConnectedProps, connect } from 'react-redux';
 
 interface MenuProps extends RouteComponentProps {
   selectedPage: string;
@@ -40,9 +42,19 @@ const appPages: AppPage[] = [
   }
 ];
 
-const labels = ['Siriane', 'Cindy', 'Martin', 'Seb', 'Marion', 'Félix'];
+const mapState = (state: RootState) => ({
+  players: state.gameReducer.Players
+});
 
-const Menu: React.FunctionComponent<MenuProps> = ({ selectedPage }) => {
+const mapDispatch = {};
+
+const connector = connect(mapState, mapDispatch);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+type Props = PropsFromRedux & RouteComponentProps & {};
+
+const Menu: React.FC<Props> = ({ /*selectedPage,*/ players }) => {
 
   return (
     <IonMenu contentId="main" type="overlay">
@@ -53,7 +65,7 @@ const Menu: React.FunctionComponent<MenuProps> = ({ selectedPage }) => {
           {appPages.map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
-                <IonItem className={selectedPage === appPage.title ? 'selected' : ''} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
+                <IonItem /*className={selectedPage === appPage.title ? 'selected' : ''}*/ routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
                   <IonIcon slot="start" icon={appPage.icon} />
                   <IonLabel>{appPage.label}</IonLabel>
                 </IonItem>
@@ -64,10 +76,10 @@ const Menu: React.FunctionComponent<MenuProps> = ({ selectedPage }) => {
 
         <IonList id="labels-list">
           <IonListHeader>Joueurs</IonListHeader>
-          {labels.map((label, index) => (
+          {[...players].map((player, index) => (
             <IonItem lines="none" key={index}>
               <IonIcon slot="start" icon={personOutline} />
-              <IonLabel>{label}</IonLabel>
+              <IonLabel>{player}</IonLabel>
             </IonItem>
           ))}
         </IonList>
@@ -76,4 +88,4 @@ const Menu: React.FunctionComponent<MenuProps> = ({ selectedPage }) => {
   );
 };
 
-export default withRouter(Menu);
+export default withRouter(connector(Menu));

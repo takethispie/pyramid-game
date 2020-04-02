@@ -24,6 +24,8 @@ import { connect } from "react-redux";
 import { ConnectedProps } from "react-redux";
 import { RouteComponentProps, withRouter } from "react-router";
 import { ThunkLoadHand } from "stores/handReducer/hand.thunk";
+import { connectToRoom } from "stores/syncMiddleware/sync.middleware";
+import store from "stores";
 
 const mapState = (state: RootState) => ({
   cardStack: state.boardReducer.CardStack,
@@ -42,10 +44,18 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 type Props = PropsFromRedux & RouteComponentProps & {};
 
-const Home: React.FC<Props> = ({ generatePyramid, history, nickname, gameId, cardStack}) => {
+const Home: React.FC<Props> = ({ generatePyramid, history, nickname, gameId, cardStack }) => {
+  function generateUniqueString(length: number) {
+    let string = ''
+    for (let i = 0; i < length; i++) {
+      string += String.fromCharCode('a'.charCodeAt(0) + Math.floor(Math.random() * 26))
+    }
+    return string
+  }
   const newGame = () => {
-    generatePyramid();
-    history.push("/board");
+    //generatePyramid();
+    const storeId = generateUniqueString(5)
+    history.push("/board/" + storeId);
   }
 
   return (
@@ -65,7 +75,7 @@ const Home: React.FC<Props> = ({ generatePyramid, history, nickname, gameId, car
             <IonTitle size="large">home</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <IonGrid> 
+        <IonGrid>
           <IonRow>
             <IonCol offset={"3"} size={"6"}>
               <IonCard>
