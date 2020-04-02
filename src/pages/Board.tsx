@@ -98,12 +98,12 @@ const Board: React.FC<Props> = ({
 
   useEffect(() => {
     const urlPathParts = window.location.pathname!.split('/')
-    if (urlPathParts[1] == 'board' && urlPathParts.length >= 3) {
+    if (urlPathParts[1] === 'board' && urlPathParts.length >= 3) {
       const storeId = urlPathParts[2]
-      if (connectedRoom != storeId) {
+      if (connectedRoom !== storeId) {
         setConnectedRoom(storeId)
         connectToRoom(storeId, () => store.dispatch).then(() => {
-          if (store.getState().boardReducer.Pyramid.length == 0) {
+          if (store.getState().boardReducer.Pyramid.length === 0) {
             generatePyramid()
           }
         })
@@ -116,28 +116,22 @@ const Board: React.FC<Props> = ({
   function getControls(step: GameStep): JSX.Element {
     switch (step) {
       case GameStep.ChooseTarget:
-        const otherPlayers = [...players].filter(player => player != nickname)
+        const otherPlayers = [...players].filter(player => player !== nickname)
         if (otherPlayers.length > 0) {
           return <ChooseTargetComponent players={otherPlayers} currentTarget={targets[nickname]} chooseTarget={player => chooseTarget(nickname, player)} />
         } else {
           return <WaitingOtherPlayersComponent />
         }
       case GameStep.Accuse:
-        let targetedByList = Object.keys(targets).filter(key => targets[key] == nickname)
+        let targetedByList = Object.keys(targets).filter(key => targets[key] === nickname)
         if (targetedByList.length > 0) {
           const playerWhoTargets = targetedByList[0]
-          let selectedButton: 'None' | 'Accuse' | 'AcceptToDrink' = 'None'
-          if (accusations[playerWhoTargets] == nickname) {
-            selectedButton = 'Accuse'
-          } else if (targets[playerWhoTargets] == undefined) {
-            selectedButton = 'AcceptToDrink'
-          }
           return <AccuseComponent playerWhoTargets={playerWhoTargets} acceptToDrink={() => acceptToDrink(playerWhoTargets, nickname)} accuseOfLying={() => accuse(playerWhoTargets, nickname)} />
         } else {
           return <WaitingOtherPlayersComponent />
         }
       case GameStep.Deny:
-        if (accusations[nickname] != undefined) {
+        if (accusations[nickname] !== undefined) {
           return <DenyComponent playerWhoAccuses={accusations[nickname]} proveNotToLie={() => proveNotToLie(nickname, accusations[nickname])} admitToLying={() => admitToLying(nickname, accusations[nickname])} />
         } else {
           return <WaitingOtherPlayersComponent />

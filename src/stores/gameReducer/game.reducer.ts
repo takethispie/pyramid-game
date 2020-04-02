@@ -1,4 +1,4 @@
-import { GameState, GameStep } from './game.state';
+import { GameState } from './game.state';
 import {
     GameActionsTypes,
     GAME_ADD_TARGET,
@@ -15,7 +15,7 @@ import {
 import { SYNC_RESET } from 'stores/syncMiddleware/sync.action';
 
 export const defaultGameState: GameState = {
-    Players: new Set
+    Players: new Set()
     , Targets: {}
     , Accusations: {}
     , Sips: {}
@@ -40,7 +40,7 @@ const GameReducer = (state: GameState = defaultGameState, action: GameActionsTyp
         case GAME_REMOVE_PLAYER:
             return {
                 ...state
-                , Players: new Set([...state.Players].filter(player => player != action.payload.player))
+                , Players: new Set([...state.Players].filter(player => player !== action.payload.player))
             }
 
         case GAME_ADD_TARGET:

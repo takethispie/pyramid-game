@@ -59,7 +59,7 @@ const GamePoc: React.FC<Props> = ({
     case GameStep.ChooseTarget:
       let potentialTargetsButtons = []
       for (const potentialTarget of players) {
-        if (potentialTarget != nickName) {
+        if (potentialTarget !== nickName) {
           potentialTargetsButtons.push(<p><button onClick={() => chooseTarget(nickName, potentialTarget)}>{potentialTarget}</button></p>)
         }
       }
@@ -71,8 +71,8 @@ const GamePoc: React.FC<Props> = ({
       break
 
     case GameStep.Accuse:
-      let targetedByList = Object.keys(targets).filter(key => targets[key] == nickName)
-      if (targetedByList.length == 0) {
+      let targetedByList = Object.keys(targets).filter(key => targets[key] === nickName)
+      if (targetedByList.length === 0) {
         controls =
           <div>
             <p>You are not targeted</p>
@@ -97,7 +97,7 @@ const GamePoc: React.FC<Props> = ({
 
     case GameStep.Deny:
       let accuser = accusations[nickName]
-      if (accuser != undefined) {
+      if (accuser !== undefined) {
         controls =
           <div>
             {accuser} accuses you of lying!
@@ -110,7 +110,7 @@ const GamePoc: React.FC<Props> = ({
       break
 
     case GameStep.Drink:
-      if (sips[nickName] != undefined && sips[nickName] > 0) {
+      if (sips[nickName] !== undefined && sips[nickName] > 0) {
         controls =
           <div>
             You have to drink {sips[nickName]} sips

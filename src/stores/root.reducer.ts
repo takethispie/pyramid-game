@@ -1,4 +1,4 @@
-import { combineReducers, Action } from 'redux'
+import { combineReducers } from 'redux'
 import MatchReducer, { defaultMatchState } from './matchReducer/match.reducer'
 import BoardReducer, { defaultBoardState } from './boardReducer/board.reducer'
 import HandReducer, { defaultHandState } from './handReducer/hand.reducer'

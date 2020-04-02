@@ -1,5 +1,3 @@
-import { GameActionsTypes } from "stores/gameReducer/game.actions";
-
 export const MATCH_CONNECT = "CONNECT";
 export const MATCH_CONNECT_SUCCESS = "MATCH_CONNECT_SUCCESS";
 export const MATCH_CONNECT_ERROR = "MATCH_CONNECT_ERROR";

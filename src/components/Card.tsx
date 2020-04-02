@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Image } from 'react-konva';
 import useImage from 'use-image';
 import { Card } from 'models/Card';
@@ -29,12 +29,12 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = PropsFromRedux & props;
 
 
-const CardComponent: React.FC<Props> = ({ card, visibleCards, revealCardSuccess, clicked = () => {}, color = "gray" }) => {
-    if(visibleCards.some(id => id === card.Id && card.Visible == false)) revealCardSuccess(card);
+const CardComponent: React.FC<Props> = ({ card, visibleCards, revealCardSuccess, clicked = () => { }, color = "gray" }) => {
+    if (visibleCards.some(id => id === card.Id && card.Visible === false)) revealCardSuccess(card);
 
     const [img] = useImage("/assets/cards/" + card.Name.toString() + ".png");
     const [hiddenCardImg] = useImage("/assets/cards/" + color + "_back.png");
-    return card.Visible ? <Image width={110} height={180} x={card.X} y={card.Y} image={img} /> 
+    return card.Visible ? <Image width={110} height={180} x={card.X} y={card.Y} image={img} />
         : <Image width={110} height={180} x={card.X} y={card.Y} image={hiddenCardImg} onClick={() => clicked(card)}></Image>
 };
 

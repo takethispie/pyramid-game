@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ConnectedProps, connect } from 'react-redux';
 import { RootState } from 'stores/root.reducer';
 import CardComponent from './Card';
 import { Card } from 'models/Card';
-import { IonProgressBar } from '@ionic/react';
 import { HandStep } from 'models/HandStep';
 
 interface props {
@@ -30,7 +29,7 @@ const Hand: React.FC<Props> = ({ cardsInHand, step }) => {
     let y: number = 600;
 
     const selectCard = (card: Card) => {
-        if(step == HandStep.Choose)
+        if (step === HandStep.Choose)
             console.log(card);
     }
 

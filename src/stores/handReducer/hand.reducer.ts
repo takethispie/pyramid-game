@@ -58,7 +58,7 @@ const HandReducer = (
         SelectedCardIndex: action.payload.index,
         Step: HandStep.Idle,
         Hand: state.Hand.map((card, id) => {
-          if (action.payload.index == id) card.Visible = true;
+          if (action.payload.index === id) card.Visible = true;
           return card;
         })
       };

@@ -1,5 +1,5 @@
 import { Middleware, Action } from "redux";
-import { SYNC, Sync, SyncReset } from "./sync.action";
+import { SYNC, Sync } from "./sync.action";
 import { Dispatch } from "react";
 import { ThunkJoinGame, ThunkKeepAlive, ThunkKickInactivePlayers } from "stores/gameReducer/game.thunk";
 import store from "stores";
@@ -82,11 +82,11 @@ function createSyncMiddleware(
 
     ws_.onmessage = function (event) {
         const action = JSON.parse(event.data)
-        if (action.type == 'CONNECTED') {
-            if (action.payload.storeId == storeId_ && connectToRoomSuccess_) {
+        if (action.type === 'CONNECTED') {
+            if (action.payload.storeId === storeId_ && connectToRoomSuccess_) {
                 connectToRoomSuccess_()
             }
-        } else if (filter != undefined && filter(action)) {
+        } else if (filter !== undefined && filter(action)) {
             getDispatch()(Sync(action))
         }
     }
@@ -108,7 +108,7 @@ function createSyncMiddleware(
         if (action.type === SYNC) {
             next(action.payload.action)
         } else {
-            if (filter != undefined && filter(action)) {
+            if (filter !== undefined && filter(action)) {
                 sendAction(action)
             }
             next(action)

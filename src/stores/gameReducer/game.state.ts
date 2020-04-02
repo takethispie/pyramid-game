@@ -16,15 +16,15 @@ export interface GameState {
 export const KEEPALIVE_TIMEOUT_MS = 10000
 
 function allSipsAreZero(game: GameState): boolean {
-    return Object.keys(game.Sips).every(player => game.Sips[player] == 0)
+    return Object.keys(game.Sips).every(player => game.Sips[player] === 0)
 }
 
 function targetsIsEmpty(game: GameState): boolean {
-    return Object.keys(game.Targets).length == 0
+    return Object.keys(game.Targets).length === 0
 }
 
 function targetsIsFull(game: GameState): boolean {
-    return [...game.Players].every(player => game.Targets[player] != undefined)
+    return [...game.Players].every(player => game.Targets[player] !== undefined)
 }
 
 function targetsIsPartial(game: GameState): boolean {
@@ -32,7 +32,7 @@ function targetsIsPartial(game: GameState): boolean {
 }
 
 function accusationsIsEmpty(game: GameState): boolean {
-    return Object.keys(game.Accusations).length == 0
+    return Object.keys(game.Accusations).length === 0
 }
 
 export function getStep(game: GameState): GameStep | undefined {
@@ -43,7 +43,7 @@ export function getStep(game: GameState): GameStep | undefined {
     const allSipsZero = allSipsAreZero(game)
     if (!targetsFull && accusationsEmpty && allSipsZero) {
         return GameStep.ChooseTarget
-    } else if (targetsPartial && (!accusationsEmpty || !allSipsZero) || targetsFull && accusationsEmpty && allSipsZero) {
+    } else if ((targetsPartial && (!accusationsEmpty || !allSipsZero)) || (targetsFull && accusationsEmpty && allSipsZero)) {
         return GameStep.Accuse
     } else if (targetsEmpty && !accusationsEmpty) {
         return GameStep.Deny

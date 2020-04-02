@@ -1,7 +1,6 @@
 import { MatchState } from './match.state';
 import { MatchActionsTypes, MATCH_CHANGE_NICKNAME } from './match.actions';
-import GameReducer, { defaultGameState } from 'stores/gameReducer/game.reducer';
-import { GameActionsTypes } from 'stores/gameReducer/game.actions';
+import { defaultGameState } from 'stores/gameReducer/game.reducer';
 
 export const defaultMatchState: MatchState = {
     MatchId: "",

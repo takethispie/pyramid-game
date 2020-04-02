@@ -10,7 +10,7 @@ interface Props {
 const ChooseTargetComponent: React.FunctionComponent<Props> = ({ players, currentTarget, chooseTarget }) => {
     let targetButtons = []
     for (const player of players) {
-        const color = player == currentTarget ? 'danger' : 'primary'
+        const color = player === currentTarget ? 'danger' : 'primary'
         targetButtons.push(
             <IonButton
                 color={color}
