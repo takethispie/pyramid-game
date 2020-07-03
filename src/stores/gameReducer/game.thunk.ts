@@ -14,7 +14,6 @@ import {
 } from "./game.actions";
 import { RootState } from "stores/root.reducer";
 import { KEEPALIVE_TIMEOUT_MS, getStep } from "./game.state";
-import { MultiAction } from "stores/multiActionMiddleware/multiAction.actions";
 
 export const ThunkChooseTarget =
     (playerWhoTargets: string, targetedPlayer: string): ThunkAction<void, RootState, unknown, Action<string>> =>
@@ -27,10 +26,8 @@ export const ThunkAccuse =
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const state = getState().gameReducer
             if (state.Targets[playerWhoTargets] == targetedPlayer) {
-                dispatch(MultiAction([
-                    GameAddAccusation(playerWhoTargets, targetedPlayer)
-                    , GameRemoveTarget(playerWhoTargets)
-                ]))
+                dispatch(GameAddAccusation(playerWhoTargets, targetedPlayer));
+                dispatch(GameRemoveTarget(playerWhoTargets));
             }
         }
 
@@ -39,10 +36,8 @@ export const ThunkAcceptToDrink =
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const state = getState().gameReducer
             if (state.Targets[playerWhoTargets] == targetedPlayer) {
-                dispatch(MultiAction([
-                    GameAddSips(targetedPlayer, 1)
-                    , GameRemoveTarget(playerWhoTargets)
-                ]))
+                dispatch(GameAddSips(targetedPlayer, 1));
+                dispatch(GameRemoveTarget(playerWhoTargets));
             }
         }
 
@@ -51,10 +46,8 @@ export const ThunkProveNotToLie =
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const state = getState().gameReducer
             if (state.Accusations[playerWhoTargets] == targetedPlayer) {
-                dispatch(MultiAction([
-                    GameAddSips(targetedPlayer, 2)
-                    , GameRemoveAccusation(playerWhoTargets)
-                ]))
+                dispatch(GameAddSips(targetedPlayer, 2))
+                dispatch(GameRemoveAccusation(playerWhoTargets))
             }
         }
 
@@ -63,10 +56,8 @@ export const ThunkAdmitToLying =
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const state = getState().gameReducer
             if (state.Accusations[playerWhoTargets] == targetedPlayer) {
-                dispatch(MultiAction([
-                    GameAddSips(playerWhoTargets, 2)
-                    , GameRemoveAccusation(playerWhoTargets)
-                ]))
+                dispatch(GameAddSips(playerWhoTargets, 2));
+                dispatch(GameRemoveAccusation(playerWhoTargets))
             }
         }
 
@@ -79,17 +70,16 @@ export const ThunkDrink =
 export const ThunkJoinGame =
     (): ThunkAction<void, RootState, unknown, Action<string>> =>
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
-            dispatch(MultiAction([
-                GameAddPlayer(getState().matchReducer.NickName)
-                , GameKeepAlive(getState().matchReducer.NickName, new Date)
-            ]))
+            dispatch(GameAddPlayer(getState().matchReducer.NickName));
+            dispatch(GameKeepAlive(getState().matchReducer.NickName, new Date))
         }
 
 export const ThunkLeaveGame =
     (): ThunkAction<void, RootState, unknown, Action<string>> =>
         (dispatch: Dispatch<Action>, getState: () => RootState) => {
             const nickName = getState().matchReducer.NickName
-            dispatch(MultiAction(getPlayerLeaveCleanupActions(nickName, getState())))
+            let actions = getPlayerLeaveCleanupActions(nickName, getState());
+            actions.forEach(action => dispatch(action));
         }
 
 export const ThunkKickInactivePlayers =
@@ -100,7 +90,8 @@ export const ThunkKickInactivePlayers =
                     getState().gameReducer.KeepAlive[player] == undefined
                     || getState().gameReducer.KeepAlive[player].getTime() < now.getTime() - KEEPALIVE_TIMEOUT_MS
                 ) {
-                    dispatch(MultiAction(getPlayerLeaveCleanupActions(player, getState())))
+                    let actions = getPlayerLeaveCleanupActions(player, getState());
+                    actions.forEach(action => dispatch(action));
                 }
             }
         }

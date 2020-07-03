@@ -12,7 +12,6 @@ import {
     GAME_KEEPALIVE,
     GAME_REMOVE_KEEPALIVE
 } from './game.actions';
-import { SYNC_RESET } from 'stores/syncMiddleware/sync.action';
 
 export const defaultGameState: GameState = {
     Players: new Set
@@ -24,10 +23,6 @@ export const defaultGameState: GameState = {
 
 const GameReducer = (state: GameState = defaultGameState, action: GameActionsTypes): GameState => {
     switch (action.type) {
-
-        case SYNC_RESET:
-            return defaultGameState
-
         case GAME_ADD_PLAYER:
             return {
                 ...state

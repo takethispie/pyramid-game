@@ -24,7 +24,6 @@ import { connect } from "react-redux";
 import { ConnectedProps } from "react-redux";
 import { RouteComponentProps, withRouter } from "react-router";
 import { ThunkLoadHand } from "stores/handReducer/hand.thunk";
-import { connectToRoom } from "stores/syncMiddleware/sync.middleware";
 import store from "stores";
 
 const mapState = (state: RootState) => ({

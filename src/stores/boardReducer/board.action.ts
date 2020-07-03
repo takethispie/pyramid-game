@@ -1,5 +1,4 @@
 import { Card } from "models/Card";
-import { SyncResetAction } from "stores/syncMiddleware/sync.action";
 
 export const REVEAL_CARD = "REVEAL_CARD";
 export const REVEAL_CARD_SUCCESS = "REVEAL_CARD_SUCCESS";
@@ -51,7 +50,7 @@ interface GeneratePyramidError {
 }
 
 export type BoardActionsTypes = RevealCard | RevealCardSuccess | RevealCardError
-    | GeneratePyramid | GeneratePyramidSuccess | GeneratePyramidError | SyncResetAction;
+    | GeneratePyramid | GeneratePyramidSuccess | GeneratePyramidError;
 
 
 export function RevealCard(): BoardActionsTypes {

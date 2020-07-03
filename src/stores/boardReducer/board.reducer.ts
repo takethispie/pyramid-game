@@ -1,6 +1,5 @@
 import { BoardState } from "./board.state";
 import { BoardActionsTypes, REVEAL_CARD, REVEAL_CARD_SUCCESS, GENERATE_PYRAMID, GENERATE_PYRAMID_SUCCESS, GENERATE_PYRAMID_ERROR } from "./board.action";
-import { SYNC_RESET } from "stores/syncMiddleware/sync.action";
 
 export const defaultBoardState: BoardState = {
     VisibleCardIds: [],
@@ -14,9 +13,6 @@ export const defaultBoardState: BoardState = {
 
 const BoardReducer = (state: BoardState = defaultBoardState, action: BoardActionsTypes): BoardState => {
     switch (action.type) {
-        case SYNC_RESET:
-            return defaultBoardState
-
         case REVEAL_CARD:
             return { ...state, VisibleCardIds: [...state.VisibleCardIds, state.LastId + 1], LastId: state.LastId + 1, RemainingCards: state.RemainingCards.filter(c => c !== state.LastId + 1) }
 
