@@ -24,7 +24,6 @@ import "./theme/variables.css";
 
 import Board from 'pages/Board';
 import Home from 'pages/Home';
-import GamePoc from 'pages/GamePoc';
 import { Provider } from 'react-redux';
 import store from 'stores';
 
@@ -46,9 +45,6 @@ const App: React.FC = () => {
                 return <Home />;
               }} />
               <Route path="/" render={() => <Redirect to="/home" />} exact={true} />
-              <Route path="/game-poc" render={() => {
-                return <GamePoc />;
-              }} />
             </IonRouterOutlet>
           </IonSplitPane>
         </IonReactRouter>

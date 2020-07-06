@@ -73,17 +73,6 @@ const Board: React.FC<Props> = ({
   , cardStack
   , leaveGame
   , generatePyramid
-  , game
-  , players
-  , targets
-  , chooseTarget
-  , acceptToDrink
-  , accuse
-  , accusations
-  , admitToLying
-  , proveNotToLie
-  , sips
-  , drink
 }) => {
 
   if (hand.length === 0) loadHand(nickname, matchId, cardStack);
@@ -139,9 +128,7 @@ const Board: React.FC<Props> = ({
         </IonGrid>
       </IonContent>
       <IonFooter>
-        <IonToolbar>
           <IonProgressBar value={0.5}></IonProgressBar>
-        </IonToolbar>
       </IonFooter>
     </IonPage>
   );

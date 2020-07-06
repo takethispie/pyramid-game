@@ -166,48 +166,6 @@ export function GameResetSips(player: string): GameResetSipsAction {
     }
 }
 
-// ----- GAME_KEEPALIVE -----
-
-export const GAME_KEEPALIVE = "GAME_KEEPALIVE"
-interface GameKeepAliveAction {
-    type: typeof GAME_KEEPALIVE,
-    payload: {
-        player: string,
-        date: Date
-    }
-}
-
-export function GameKeepAlive(player: string, date: Date): GameKeepAliveAction {
-    return {
-        type: GAME_KEEPALIVE,
-        payload: {
-            player,
-            date
-        }
-    }
-}
-
-// ----- GAME_REMOVE_KEEPALIVE -----
-
-export const GAME_REMOVE_KEEPALIVE = "GAME_REMOVE_KEEPALIVE"
-interface GameRemoveKeepAliveAction {
-    type: typeof GAME_REMOVE_KEEPALIVE,
-    payload: {
-        player: string
-    }
-}
-
-export function GameRemoveKeepAlive(player: string): GameRemoveKeepAliveAction {
-    return {
-        type: GAME_REMOVE_KEEPALIVE,
-        payload: {
-            player
-        }
-    }
-}
-
-// -----
-
 export type GameActionsTypes
     = GameAddPlayerAction
     | GameRemovePlayerAction
@@ -217,5 +175,3 @@ export type GameActionsTypes
     | GameRemoveAccusationAction
     | GameAddSipsAction
     | GameResetSipsAction
-    | GameKeepAliveAction
-    | GameRemoveKeepAliveAction

@@ -10,7 +10,6 @@ export interface GameState {
     , Targets: { [id: string]: string }
     , Accusations: { [id: string]: string }
     , Sips: { [id: string]: number }
-    , KeepAlive: { [id: string]: Date }
 }
 
 export const KEEPALIVE_TIMEOUT_MS = 10000
