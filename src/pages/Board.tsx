@@ -24,7 +24,6 @@ import { ThunkRevealNextCard, ThunkGeneratePyramid } from "stores/boardReducer/b
 import store from "stores";
 import Hand from "components/Hand";
 import { ThunkLoadHand } from "stores/handReducer/hand.thunk";
-import { ThunkLeaveGame, ThunkChooseTarget, ThunkAcceptToDrink, ThunkAccuse, ThunkAdmitToLying, ThunkProveNotToLie, ThunkDrink } from "stores/gameReducer/game.thunk";
 import { useBeforeunload } from "react-beforeunload";
 
 
@@ -37,22 +36,13 @@ const mapState = (state: RootState) => ({
   , cardStack: state.boardReducer.CardStack
   , game: state.gameReducer
   , players: state.gameReducer.Players
-  , targets: state.gameReducer.Targets
-  , accusations: state.gameReducer.Accusations
   , sips: state.gameReducer.Sips
 });
 
 const mapDispatch = {
   revealCard: ThunkRevealNextCard
   , loadHand: ThunkLoadHand
-  , leaveGame: ThunkLeaveGame
   , generatePyramid: ThunkGeneratePyramid
-  , chooseTarget: ThunkChooseTarget
-  , acceptToDrink: ThunkAcceptToDrink
-  , accuse: ThunkAccuse
-  , admitToLying: ThunkAdmitToLying
-  , proveNotToLie: ThunkProveNotToLie
-  , drink: ThunkDrink
 };
 
 const connector = connect(mapState, mapDispatch);
@@ -63,16 +53,15 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = PropsFromRedux & {};
 
 const Board: React.FC<Props> = ({
-  revealCard
-  , pyramid
-  , boardError
-  , hand
-  , loadHand
-  , nickname
-  , matchId
-  , cardStack
-  , leaveGame
-  , generatePyramid
+  revealCard,
+  pyramid,
+  boardError,
+  hand,
+  loadHand,
+  nickname,
+  matchId,
+  cardStack,
+  generatePyramid
 }) => {
 
   if (hand.length === 0) loadHand(nickname, matchId, cardStack);
@@ -85,7 +74,7 @@ const Board: React.FC<Props> = ({
     }
   }, [connectedRoom, pyramid.length, generatePyramid])
 
-  useBeforeunload(() => leaveGame());
+  useBeforeunload(() => {});
 
   return (
     <IonPage>
