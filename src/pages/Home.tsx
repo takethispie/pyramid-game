@@ -52,7 +52,7 @@ const Home: React.FC<Props> = ({ generatePyramid, history, nickname, gameId, car
     return string
   }
   const newGame = () => {
-    //generatePyramid();
+    generatePyramid();
     const storeId = generateUniqueString(5)
     history.push("/board/" + storeId);
   }
@@ -81,8 +81,8 @@ const Home: React.FC<Props> = ({ generatePyramid, history, nickname, gameId, car
                 <IonCardContent>
                   <IonList>
                     <IonItem>
-                      <IonLabel position={'floating'}>Lien de la partie</IonLabel>
-                      <IonInput></IonInput>
+                      <IonLabel position={'stacked'}>Lien de la partie</IonLabel>
+                      <IonInput placeholder={'XXXX'}></IonInput>
                     </IonItem>
                     <IonItem>
                       <IonButton>Rejoindre une partie</IonButton>
